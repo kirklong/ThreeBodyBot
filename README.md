@@ -1,5 +1,7 @@
 # Random Three Body Simulation Generator (with Twitter bot)
 
+See sample animations on the bot's [Twitter](https://twitter.com/3bodyprob)!
+
 ### The Three Body Generator:
 This is a fun little pet project I put together in Julia that renders a random gravitational three body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (even with fake stars background stars!) and saves it locally.
 
