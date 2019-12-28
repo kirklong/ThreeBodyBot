@@ -1,6 +1,6 @@
 # Random Three Body Simulation Generator (with Twitter bot)
 
-See sample animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
+See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 
 ### The Three Body Generator:
 This is a fun little pet project I put together in Julia that renders a random gravitational three body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (even with fake stars background stars!) and saves it locally.
@@ -53,8 +53,8 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 ## Built With
 
 * [Julia](https://julialang.org/)
-* [Node.js](https://nodejs.org/en/) - Dependency Management
-* Bash - used to pull all scripts together in running and posting the animations.
+* [Node.js](https://nodejs.org/en/)
+* [Bash](https://www.gnu.org/software/bash/) – used to pull all scripts together in creating and posting the animations.
 
 
 ## Author
@@ -66,4 +66,4 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 Incredibly grateful for the Node.js examples used in creating the Twitter bot already mentioned above.
 
-Also grateful for Dr. Olga Goulko, whose class I took Fa2018 enabled me to develop the skills to put together a project like this--parts of this Julia code were repurposed from my final project in her class, where I generated a Saturn V physics simulation in Python.
+Also grateful for Dr. Olga Goulko, whose class I took Fa2018 enabled me to develop the skills to put together a project like this – parts of this Julia code were repurposed from my final project in her class, where I generated a Saturn V physics simulation in Python.
