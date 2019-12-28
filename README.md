@@ -52,9 +52,10 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 ## Built With
 
-* [Julia](https://julialang.org/)
-* [Node.js](https://nodejs.org/en/)
-* [Bash](https://www.gnu.org/software/bash/) – used to pull all scripts together in creating and posting the animations.
+* [Julia](https://julialang.org/) – to simulate the system and create the animation frames.
+* [FFmpeg](https://ffmpeg.org/) – to render the animations.
+* [Node.js](https://nodejs.org/en/) – to post the animations to Twitter (with the help of [twit](https://www.npmjs.com/package/twit)).
+* [Bash](https://www.gnu.org/software/bash/) – to pull all scripts together and manage the resulting files.
 
 
 ## Author
