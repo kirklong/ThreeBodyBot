@@ -1,4 +1,4 @@
-# Random Three Body Simulation Generator\(***with Twitter bot***)
+# Random Three Body Simulation Generator (***with Twitter bot***)
 
 See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 
