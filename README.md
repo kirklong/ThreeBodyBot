@@ -67,3 +67,5 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 Incredibly grateful for the Node.js examples used in creating the Twitter bot already mentioned above.
 
 Also grateful for Dr. Olga Goulko, whose class I took Fa2018 enabled me to develop the skills to put together a project like this – parts of this Julia code were repurposed from my final project in her class, where I generated a Saturn V physics simulation in Python.
+
+Finally, to create this README I followed this excellent [template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
