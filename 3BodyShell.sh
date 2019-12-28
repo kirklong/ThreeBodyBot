@@ -1,9 +1,10 @@
 #!/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
 #ulimit -S 4096 #for longer animations there are more frames than base limit of 1024 open files
 ulimit -n 4096
 #ulimit -H -c unlimited #changed to get access to core dumps for file size exceeded
 #ulimit -S -c unlimited
-cd ~/Documents/3Body
+cd /home/kirk/Documents/3Body
 oldAnim="/home/kirk/Documents/3Body/3Body_fps30.mp4"
 if [ -f $oldAnim ] ; then
     rm $oldAnim #not strictly necessary, but removing prevents tweeting out old animation if there is an error
