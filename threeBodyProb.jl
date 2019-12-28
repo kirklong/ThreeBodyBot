@@ -238,7 +238,7 @@ for i=1:35:length(t)
     gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
-    limx,limy=getLims(pos./1.5e11,5) #convert to AU, 5 AU padding
+    limx,limy=getLims(pos./1.5e11,10) #convert to AU, 10 AU padding
     p=plot(plotData[1][1:i]./1.5e11,plotData[2][1:i]./1.5e11,label="",linecolor=colors[1]) #plot orbits up to i
     p=plot!(plotData[3][1:i]./1.5e11,plotData[4][1:i]./1.5e11,label="",linecolor=colors[2])
     p=plot!(plotData[5][1:i]./1.5e11,plotData[6][1:i]./1.5e11,label="",linecolor=colors[3])
