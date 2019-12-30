@@ -11,7 +11,7 @@ function initCondGen() #get random initial conditions for mass/radius, position,
         accept2=false
         while accept2==false
             pos2=rand(-35:35,2) #random initial coordinates for second body, AU
-            dist21=sqrt((pos1[1]-pos2[1])^2+(pos1[2]-pos2[1])^2)
+            dist21=sqrt((pos1[1]-pos2[1])^2+(pos1[2]-pos2[2])^2)
             if (dist21*1.5e11)>(rad[1]+rad[2]) #they aren't touching
                 accept2=true
                 return pos2
@@ -23,8 +23,8 @@ function initCondGen() #get random initial conditions for mass/radius, position,
         accept3=false
         while accept3==false
             pos3=rand(-35:35,2) #random initial coordinates for third body, AU
-            dist31=sqrt((pos1[1]-pos3[1])^2+(pos1[2]-pos3[1])^2)
-            dist32=sqrt((pos2[1]-pos3[1])^2+(pos2[2]-pos3[1])^2)
+            dist31=sqrt((pos1[1]-pos3[1])^2+(pos1[2]-pos3[2])^2)
+            dist32=sqrt((pos2[1]-pos3[1])^2+(pos2[2]-pos3[2])^2)
             if (dist31*1.5e11)>(rad[1]+rad[3]) && (dist32*1.5e11)>(rad[2]+rad[3]) #3rd isn't touching either
                 accept3=true
                 return pos3
@@ -139,11 +139,19 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     while interesting==false
         plotData,t,m,rad=gen3Body([50,150],50000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
-            println(maximum(t)/yearSec)
+            println(maximum(t)/yearSec) #tell me how many years we are simulating
+            open("cron_log.txt","a") do f #for cron logging, a flag = append
+                write(f,"$(maximum(t)/yearSec)\n")
+            end
             return plotData,t,m,rad
             interesting=true
         elseif i>30 #computationally expensive so don't want to go forever
-            interesting=true
+            interesting=true #render it anyways I guess because sometimes it's fun?
+            println("did not find interesting solution in number of tries allotted, running anyways")
+            println(maximum(t)/yearSec) #how many years simulation runs for
+            open("cron_log.txt","a") do f #for cron logging
+                write(f,"$(maximum(t)/yearSec)\n")
+            end
             return plotData,t,m,rad
         end
         i+=1
@@ -215,7 +223,7 @@ function makeCircleVals(r,center=[0,0])
     return xVals,yVals
 end
 
-plotData,t,m,rad=getInteresting3Body(10)
+plotData,t,m,rad=getInteresting3Body(15)
 c=[:DodgerBlue,:Gold,:Crimson] #most massive to least massive, also roughly corresponds to temp
 colors=getColors(m,c)
 #adding fake stars
@@ -234,7 +242,8 @@ end
 
 plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
 threeBodyAnim=Animation(plotLoadPath,String[])
-for i=1:35:length(t)
+for i=1:35:length(t) #this makes animation scale ~1 sec/year with other conditions
+    GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
     gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
@@ -255,8 +264,10 @@ for i=1:35:length(t)
         legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
         grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
     frame(threeBodyAnim,p) #generate the frame
+    closeall() #close plots
 end
-threeBodyFile="3Body_fps30.mp4"
+
+#threeBodyFile="3Body_fps30.mp4"
 
 #crf is compression value (17 or 18 "visually lossless"), pix_fmt is for twitter specific vid req, -b:v specifies target bitrate, -vcodec specifies codec (h264 in this case) -y says overwrite existing file
 #run( `ffmpeg -framerate 30 -i $plotLoadPath"%06d.png" -vcodec libx264 -pix_fmt yuv420p -profile:v high -b:v 2048K -y -vf "scale=720:720,setdar=1/1" $threeBodyFile` ) #-vf scale=720:72 -crf 25
