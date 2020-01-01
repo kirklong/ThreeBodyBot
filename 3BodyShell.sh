@@ -21,7 +21,7 @@ rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%6)) #get number between 1 and 6
+num=$((1+RANDOM%9)) #get number between 1 and 9
 if [ $num -eq 1 ]; then
   echo 'Music: Adagio for Strings -- Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
@@ -34,6 +34,12 @@ elif [ $num -eq 5 ]; then
   echo 'Music: Gymnopedie No. 1 -- Satie' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 6 ]; then
   echo 'Music: Symphony No. 5 (1st Mvmt) -- Beethoven' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 7 ]; then
+  echo 'Music: First Step (Interstellar) -- Zimmer' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 8 ]; then
+  echo 'Music: Time (Inception) -- Zimmer' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 9 ]; then
+  echo 'Music: I Need a Ride (The Expanse) -- Shorter' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 #1=adagio 4 strings
 #2=blue danube
@@ -41,6 +47,9 @@ fi
 #4=clair de lune
 #5=gymnopedie 1
 #6=beethoven 5
+#7=first step/Interstellar
+#8=time/Inception
+#9=I need a ride/Expanse
 musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.mp3"
 videoFile="/home/kirk/Documents/3Body/3Body_fps30.mp4"
 combinedFile="3Body_fps30_wMusic.mp4"

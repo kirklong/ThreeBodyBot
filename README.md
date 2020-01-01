@@ -77,7 +77,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
 
-* Musical selections that accompany animations: 
+* Musical selections that accompany animations:
 
   1. [Adagio for Strings -- Barber](https://www.youtube.com/watch?v=tVNhFMZP4NM)
 
@@ -90,3 +90,11 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   5. [Gymnopédie No. 1 -- Satie](https://www.youtube.com/watch?v=S-Xm7s9eGxU)
 
   6. [Symphony No. 5 -- Beethoven](https://www.youtube.com/watch?v=_4IRMYuE1hI)
+
+  7. [First Step (from the Interstellar soundtrack) -- Zimmer](https://www.youtube.com/watch?v=IDsCtDRV2uA)
+
+  8. [Time (from the Inception soundtrack) -- Zimmer](https://www.youtube.com/watch?v=RxabLA7UQ9k)
+
+  9. [I Need a Ride (from The Expanse season 3 soundtrack)](https://www.youtube.com/watch?v=sbWmzoL4FwM)
+
+**Disclaimer:** music used under fair use (this is a purely educational/not for profit project) but if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
