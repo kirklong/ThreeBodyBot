@@ -12,7 +12,7 @@ var T = new Twit(config);
 
 function upload_video(){
   console.log('Opening video...');
-  var video_path = '/home/kirk/Documents/3Body/3Body_fps30.mp4'
+  var video_path = '/home/kirk/Documents/3Body/3Body_fps30_wMusicAAC.mp4'
     T.postMediaChunked({
       file_path: video_path,
       media_type: 'video/mp4',
@@ -45,7 +45,7 @@ function upload_video(){
 	    console.error(err)
 	  }
       T.post('statuses/update', {
-	        status: 'initial conditions:\n'+tweet_text+'\n#ThreeBodyProblem #physics #scicomm', // add to status text, attach to media, and tweet
+	        status: 'Initial conditions:\n'+tweet_text+'\n#ThreeBodyProblem #physics #scicomm', // add to status text, attach to media, and tweet
           media_ids: [mediaIdStr]
         },
         function(err, data, response) {

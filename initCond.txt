@@ -1,3 +1,4 @@
-m1=34.2 m2=123.8 m3=27.1 (solar masses)
-v1x=-2.642 v1y=-2.93 v2x=-4.643 v2y=6.462 v3x=0.064 v3y=6.235 (km/s)
-x1=-29 y1=17 x2=17 y2=-10 x3=-5 y3=15 (AU from center)
+m1=37.1 m2=47.8 m3=103.9 (solar masses)
+v1x=-4.59 v1y=-6.515 v2x=2.003 v2y=5.225 v3x=-6.495 v3y=-0.068 (km/s)
+x1=-24 y1=-25 x2=3 y2=9 x3=7 y3=-26 (AU from center) 
+Music: Moonlight Sonata (1st Mvmt) -- Beethoven

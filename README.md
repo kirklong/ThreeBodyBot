@@ -76,3 +76,17 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 * Thanks to Hunter Coleman for noticing a minor error in the initCondGen() function where distances were calculated improperly.
 
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
+
+* Musical selections that accompany animations: 
+
+  1. [Adagio for Strings -- Barber](https://www.youtube.com/watch?v=tVNhFMZP4NM)
+
+  2. [The Blue Danube Waltz -- Strauss](https://www.youtube.com/watch?v=cKkDMiGUbUw)
+
+  3. [Moonlight Sonata (1st movement) -- Beethoven](https://www.youtube.com/watch?v=4Tr0otuiQuU)
+
+  4. [Clair de Lune -- Debussy](https://www.youtube.com/watch?v=CvFH_6DNRCY)
+
+  5. [Gymnopédie No. 1 -- Satie](https://www.youtube.com/watch?v=S-Xm7s9eGxU)
+
+  6. [Symphony No. 5 -- Beethoven](https://www.youtube.com/watch?v=_4IRMYuE1hI)
