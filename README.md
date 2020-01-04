@@ -97,4 +97,4 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
   9. [I Need a Ride (from The Expanse season 3 soundtrack) -- Shorter](https://www.youtube.com/watch?v=sbWmzoL4FwM)
 
-**Disclaimer:** music used under fair use (this is a purely educational/not for profit project) but if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
+**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
