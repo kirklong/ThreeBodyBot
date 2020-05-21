@@ -83,7 +83,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 * To create this README I followed this excellent [template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
 
-* Thanks to Hunter Coleman for noticing a minor error in the initCondGen() function where distances were calculated improperly.
+* Thanks to [Hunter Coleman](https://twitter.com/hunto_cole) for noticing a minor error in the initCondGen() function where distances were calculated improperly.
 
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
 
@@ -107,4 +107,4 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
   9. [I Need a Ride (from The Expanse season 3 soundtrack) -- Shorter](https://www.youtube.com/watch?v=sbWmzoL4FwM)
 
-**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
+**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
