@@ -15,6 +15,10 @@ See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 ### The three body simulation generator
 This is a fun little pet project I put together in Julia that renders a random gravitational three body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally.
 
+
+### New and exciting! Introducing n-body generator...
+This is still a work in progress, but there are several scripts in the `nbody` folder worth looking at if you are looking to create even more gravitational chaos. Stay tuned for more detailed instructions on user-friendly versions of these scripts and watch for them on the bot's Twitter occasionally!
+
 ### The Twitter bot
 This is my first experience with JavaScript and the Twitter API, so it's mostly cobbled together code from the Twit [documentation](https://www.npmjs.com/package/twit), this auto-tweeting image bot [code](https://github.com/fourtonfish/random-image-twitterbot/blob/master/server-attribution.js), and this video tweeting example from [Loren Stewart](https://lorenstewart.me/2017/02/03/twitter-api-uploading-videos-using-node-js/).
 
