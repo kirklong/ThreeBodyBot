@@ -2,6 +2,16 @@
 
 See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 
+### What people are saying about @ThreeBodyBot:
+
+"I'm Jessie Christiansen and I stan the Random Three Body Problem twitter account." -- [Dr. Jessie Christiansen](https://twitter.com/aussiastronomer/status/1263121973082681347)
+
+"Mesmerizing bot" -- [Emily Lakdawalla](https://twitter.com/elakdawalla/status/1263075152691990533)
+
+"is this trisolaran propaganda" -- [adam from Twitter](https://twitter.com/gains_tweets/status/1263103612168712194)
+
+"shit I should really improve this code now that people other than me might look at it" -- [@ThreeBodyBot's inept parent](https://twitter.com/restingframe)
+
 ### The three body simulation generator
 This is a fun little pet project I put together in Julia that renders a random gravitational three body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally.
 
@@ -73,7 +83,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 * To create this README I followed this excellent [template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
 
-* Thanks to Hunter Coleman for noticing a minor error in the initCondGen() function where distances were calculated improperly.
+* Thanks to [Hunter Coleman](https://twitter.com/hunto_cole) for noticing a minor error in the initCondGen() function where distances were calculated improperly.
 
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
 
@@ -95,6 +105,6 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
   8. [Time (from the Inception soundtrack) -- Zimmer](https://www.youtube.com/watch?v=RxabLA7UQ9k)
 
-  9. [I Need a Ride (from The Expanse season 3 soundtrack)](https://www.youtube.com/watch?v=sbWmzoL4FwM)
+  9. [I Need a Ride (from The Expanse season 3 soundtrack) -- Shorter](https://www.youtube.com/watch?v=sbWmzoL4FwM)
 
-**Disclaimer:** music used under fair use (this is a purely educational/not for profit project) but if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
+**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
