@@ -1,0 +1,33 @@
+
+signal (2): Interrupt
+in expression starting at /home/kirk/Documents/3Body/nbody/requests.jl:2
+jl_update_backref_list at /buildworker/worker/package_linux64/build/src/dump.c:3114
+jl_recache_method_instance at /buildworker/worker/package_linux64/build/src/dump.c:3163 [inlined]
+jl_recache_other at /buildworker/worker/package_linux64/build/src/dump.c:3181 [inlined]
+_jl_restore_incremental at /buildworker/worker/package_linux64/build/src/dump.c:3270
+jl_restore_incremental at /buildworker/worker/package_linux64/build/src/dump.c:3314
+_include_from_serialized at ./loading.jl:681
+_require_search_from_serialized at ./loading.jl:781
+_require at ./loading.jl:1006
+require at ./loading.jl:927
+require at ./loading.jl:922
+_jl_invoke at /buildworker/worker/package_linux64/build/src/gf.c:2144 [inlined]
+jl_apply_generic at /buildworker/worker/package_linux64/build/src/gf.c:2322
+jl_apply at /buildworker/worker/package_linux64/build/src/julia.h:1692 [inlined]
+call_require at /buildworker/worker/package_linux64/build/src/toplevel.c:399 [inlined]
+eval_import_path at /buildworker/worker/package_linux64/build/src/toplevel.c:436
+jl_toplevel_eval_flex at /buildworker/worker/package_linux64/build/src/toplevel.c:656
+jl_parse_eval_all at /buildworker/worker/package_linux64/build/src/ast.c:872
+jl_load at /buildworker/worker/package_linux64/build/src/toplevel.c:872
+include at ./Base.jl:377
+exec_options at ./client.jl:288
+_start at ./client.jl:484
+jfptr__start_2076.clone_1 at /opt/julia-1.4.0/lib/julia/sys.so (unknown line)
+_jl_invoke at /buildworker/worker/package_linux64/build/src/gf.c:2144 [inlined]
+jl_apply_generic at /buildworker/worker/package_linux64/build/src/gf.c:2322
+unknown function (ip: 0x401931)
+unknown function (ip: 0x401533)
+__libc_start_main at /lib/x86_64-linux-gnu/libc.so.6 (unknown line)
+unknown function (ip: 0x4015d4)
+unknown function (ip: (nil))
+Allocations: 7259841 (Pool: 7257714; Big: 2127); GC: 5

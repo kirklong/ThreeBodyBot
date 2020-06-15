@@ -1,0 +1,9 @@
+body 1 info: m = 2.9 solar masses | v = (-3.292,-6.813) km/s | starting position = (47.0,5.0) AU from center
+body 2 info: m = 101.0 solar masses | v = (-6.937,0.172) km/s | starting position = (-37.0,29.0) AU from center
+body 3 info: m = 20.1 solar masses | v = (-3.239,6.94) km/s | starting position = (-27.0,-27.0) AU from center
+body 4 info: m = 60.8 solar masses | v = (-1.183,6.969) km/s | starting position = (-47.0,-40.0) AU from center
+body 5 info: m = 100.5 solar masses | v = (-3.761,-1.055) km/s | starting position = (36.0,7.0) AU from center
+body 6 info: m = 68.1 solar masses | v = (-1.654,-1.662) km/s | starting position = (-13.0,43.0) AU from center
+body 7 info: m = 76.1 solar masses | v = (0.566,6.184) km/s | starting position = (36.0,-28.0) AU from center
+ 
+Music: Prelude in E Minor -- Chopin

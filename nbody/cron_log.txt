@@ -1,0 +1,5 @@
+starting script
+50.0
+frames generated, running ffmpeg
+animation generated, removing png files
+adding music
