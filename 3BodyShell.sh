@@ -43,7 +43,7 @@ elif [ $num -eq 9 ]; then
 elif [ $num -eq 10 ]; then
   echo 'Music: Prelude in E Minor -- Chopin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 elif [ $num -eq 11 ]; then
-  echo 'Music: Prelude in C# Minor (Posthumous) -- Chopin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in C Sharp Minor (Posthumous) -- Chopin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 elif [ $num -eq 12 ]; then
   echo 'Music: Battlestar Sonatica (BSG) -- McCreary' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 elif [ $num -eq 13 ]; then
@@ -53,7 +53,7 @@ elif [ $num -eq 14 ]; then
 elif [ $num -eq 15 ]; then
   echo 'Music: Prelude in G Minor -- Rachmaninoff' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 elif [ $num -eq 16 ]; then
-  echo 'Music: Prelude in C# Minor -- Rachmaninoff' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in C Sharp Minor -- Rachmaninoff' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 elif [ $num -eq 17 ]; then
   echo 'Music: The Shape of Things To Come (BSG, solo piano) -- McCreary' >> /home/kirk/Documents/3Body/nbody/initCond.txt
 fi
