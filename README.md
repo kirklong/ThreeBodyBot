@@ -93,18 +93,34 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
   2. [The Blue Danube Waltz -- Strauss](https://www.youtube.com/watch?v=cKkDMiGUbUw)
 
-  3. [Moonlight Sonata (1st movement) -- Beethoven](https://www.youtube.com/watch?v=4Tr0otuiQuU)
+  3. Moonlight Sonata (1st Movement) -- Beethoven (recorded by me)
 
-  4. [Clair de Lune -- Debussy](https://www.youtube.com/watch?v=CvFH_6DNRCY)
+  4. Clair de Lune -- Debussy (recorded by me)
 
-  5. [Gymnopédie No. 1 -- Satie](https://www.youtube.com/watch?v=S-Xm7s9eGxU)
+  5. Gymnopédie No. 1 -- Satie (recorded by me)
 
   6. [Symphony No. 5 -- Beethoven](https://www.youtube.com/watch?v=_4IRMYuE1hI)
 
-  7. [First Step (from the Interstellar soundtrack) -- Zimmer](https://www.youtube.com/watch?v=IDsCtDRV2uA)
+  7. First Step (from the Interstellar soundtrack) -- Zimmer (piano cover and recording by me)
 
-  8. [Time (from the Inception soundtrack) -- Zimmer](https://www.youtube.com/watch?v=RxabLA7UQ9k)
+  8. Time (from the Inception soundtrack) -- Zimmer (piano cover and recording by me)
 
   9. [I Need a Ride (from The Expanse season 3 soundtrack) -- Shorter](https://www.youtube.com/watch?v=sbWmzoL4FwM)
-
-**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
+  
+  10. Prelude in E Minor -- Chopin (recorded by me)
+  
+  11. Prelude in C# Minor (Posthumous) -- Chopin (recorded by me)
+  
+  12. Battlestar Sonatica (from the Battlestar Galactica season 3 soundtrack) -- McCreary (recorded by me)
+  
+  13. Rhapsody in Blue (solo piano version) -- Gershwin (recorded by me)
+  
+  14. Passacaglia (from the Battlestar Galactica season 2 soundtrack) -- McCreary (piano cover recorded by me)
+  
+  15. Prelude in G Minor -- Rachmaninoff (recorded by me)
+  
+  16. Prelude in C# Minor -- Rachmaninoff (recorded by me)
+  
+  17. The Shape of Things to Come (from the Battlestar Galactica season 2 soundtrack) -- McCreary (piano cover recorded by me)
+  
+**Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith--they have either not replied or granted permission for this limited use. I've also tried to record my own versions of all pieces used (when possible), putting my music minor to good use and hopefully further mitigating any copyright issues. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
