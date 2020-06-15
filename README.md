@@ -17,7 +17,7 @@ This is a fun little pet project I put together in Julia that renders a random g
 
 
 ### New and exciting! Introducing n-body generator...
-This is still a work in progress, but there are several scripts in the `nbody` folder worth looking at if you are looking to create even more gravitational chaos. Stay tuned for more detailed instructions on user-friendly versions of these scripts and watch for them on the bot's Twitter occasionally!
+This is still a work in progress (mostly with the camera movement), but there are several scripts in the `nbody` folder worth looking at if you are looking to create even more gravitational chaos. These will start occasionally popping up on the bot's Twitter (currently a 1 in 10 chance each day), and there are new instructions below that should get you started if you want to try to make one of these yourself!
 
 ### The Twitter bot
 This is my first experience with JavaScript and the Twitter API, so it's mostly cobbled together code from the Twit [documentation](https://www.npmjs.com/package/twit), this auto-tweeting image bot [code](https://github.com/fourtonfish/random-image-twitterbot/blob/master/server-attribution.js), and this video tweeting example from [Loren Stewart](https://lorenstewart.me/2017/02/03/twitter-api-uploading-videos-using-node-js/).
@@ -28,13 +28,17 @@ To tweet from a script you need a developer account with Twitter so that you can
 
 ## Want to generate your own animations?
 
-To make the animations with this code all you really need to download is the threeBodyProb.jl script. There are comments there that hopefully explain how to use it and change the options so that you can start generating your own interesting systems! If you want to specify initial conditions (instead of having them be randomly generated) this script should be easy to modify to accomplish that goal.
+***overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org related to Black Lives Matter and I will do the heavy lifting for you! I will happily make you a classic three body version, or you can request one of my new fancy n-body simulations -- you can even pick colors and name the stars!  ***Now back to the details...***
 
-You should be able to generate an animation right away without changing any settings simply by uncommenting the code past line 271 and commenting out the code segment between lines 235 and 259. If run this way an animation should be generated in the folder where the script was run from. For more advanced control over how the animations are generated you will need to use the method outlined between lines 235 and 259, and you will need to specify some file paths. That method also generates animations ***significantly*** faster. If there is enough interest (or enough confusion) I will try to make a more generalized version of the script that doesn't depend on explicit file paths.
+To make the classic three body animations with this code all you really need to download is the `threeBodyProb.jl` script. There are comments there that hopefully explain how to use it and change the options so that you can start generating your own interesting systems! If you want to specify initial conditions (instead of having them be randomly generated) this script should be easy to modify to accomplish that goal.
+
+You should be able to generate an animation right away without changing any settings simply by uncommenting the code past line 282 and commenting out the code segment between lines 243 and 268. If run this way an animation should be generated in the folder where the script was run from. For more advanced control over how the animations are generated you will need to generate the animation frames using the method on lines 243-268, and you will need to specify a file path where you want the frames to be saved on line 243. That method also generates the frames ***significantly*** faster. If there is enough interest (or enough confusion) I will try to make a more generalized version of the script that doesn't depend on explicit file paths. Once the frames are generated you need to stitch them together using something like FFMPEG -- there are some example commands commented out in the julia script on lines 273 and 274.
 
 The 3BodySetup.ipynb notebook is more of the stream of consciousness I had while creating this project and testing different things, but it may be useful if you want to see how things are tweaked (but it's not very well documented sorry).
 
 The shell script is (3BodyShell.sh) depends almost entirely on filepaths to my machine and requires use of the Twitter API through ther server.js script but is a good template to base your own off of (if you desire), and the ffmpeg command there by itself may be useful.
+
+**If you want to make n-body simulations**, you need either the `requests.jl` or `namedBody.jl` code from the `nbody` folder -- use the `namedBody.jl` version if you want to give the stars actual names (as opposed to just masses) and the `requests.jl` version for everything else. Yes, reader, I could (and probably should) have combined these into one file but I'm exceptionally lazy and for some reason thought it was easier to make two when I did it late the other night so sorry. Both of these scripts have command line arguments that change interactivity. For example, to generate square frames for a 10 body simulation with random masses, colors, and without fun names one would execute something like `julia requests.jl 10 0 0 0`. Like in the three body code you will need to alter the filepath to where the frames are saved, and use something like FFMPEG to compile the frames after they are generated. 
 
 ### Prerequisites
 
