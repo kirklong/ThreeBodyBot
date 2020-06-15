@@ -37,7 +37,7 @@ function upload_video(){
         lastTime=Date.now()
       }
       }
-      while ((Date.now() - startTime) < 15*1000) // need to wait for twitter to process, too lazy to actually query them to check
+      while ((Date.now() - startTime) < 30*1000) // need to wait for twitter to process, too lazy to actually query them to check
      try {
 	   var tweet_text=fs.readFileSync('/home/kirk/Documents/3Body/initCond.txt','utf8') // get status text from file generated in Julia program
 	   console.log(tweet_text)
@@ -45,7 +45,7 @@ function upload_video(){
 	    console.error(err)
 	  }
       T.post('statuses/update', {
-	        status: 'Initial conditions:\n'+tweet_text+'\n#ThreeBodyProblem #physics #scicomm', // add to status text, attach to media, and tweet
+	        status: 'Initial conditions:\n'+tweet_text // add to status text, attach to media, and tweet
           media_ids: [mediaIdStr]
         },
         function(err, data, response) {
@@ -104,3 +104,5 @@ upload_video();
 //     throw err
 //   }
 // }
+
+//Another potential way using different library here: https://stackoverflow.com/questions/32231642/uploading-videos-to-twitter-using-api
