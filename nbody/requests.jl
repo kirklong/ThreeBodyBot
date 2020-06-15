@@ -49,10 +49,15 @@ function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random 
     for n=1:nBodies
         push!(r,v[n]) #v is second half of r
     end
-    open("initCond.txt","w") do f #save initial conditions to file in folder where script is run
+    open("initCondAll.txt","w") do f #save initial conditions to file in folder where script is run
        for n=1:nBodies
            write(f,"body $n info: m = $(@sprintf("%.1f",(m[n]/2e30))) solar masses | v = ($(v[n][1]/1e3),$(v[n][2]/1e3)) km/s | starting position = ($(pos[n][1]/1.5e11),$(pos[n][2]/1.5e11)) AU from center\n")
        end
+    end
+    open("initCond.txt","w") do f
+        for n=1:nBodies
+            write(f,"m$n = $(@sprintf("%.1f",(m[n]/2e30)))\n")
+        end
     end
     return [r, rad, m]
 end
@@ -214,11 +219,16 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
             accept=false
             iter=1
             mLocal=copy(m0)
+            iMax=499
+            global labelBool
+            if labelBool==1
+                iMax=0 #we set the mass in init cond
+            end
             while accept==false
                 physInfo0=initCondGen(nBodies0,mLocal,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
                 plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                if t>(stopT/5) || iter>499 #sometimes we set all the initial conditions so this is pointless but whatever
+                if t>(stopT/5) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
                     println("found a solution with a first step t = $t years in $iter iterations")
                     namesList=[["$(mLocal[i])" for i=1:length(m0)],names]
                     return plotInfo,newPhysInfo,nBodies,namesList,colors,t,rad,m
@@ -364,6 +374,8 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
         x=[]
         y=[]
+        #part of the jumpiness comes from this bit I think...should maybe keep track of which
+        #stars are "ejected" then "unejected" the next frame and prevent that..?
         for n=1:nBodies
             if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
                 push!(x,xData[n][i]/1.5e11)
@@ -398,12 +410,13 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             end
         end
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
+        #TO-DO: camera motion is def improved but still a little jumpy sometimes..?
         if listInd>2 #this block will hopefully prevent the camera from oscillating back and forth..? (for a 10 frames right now)
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2] #one back
             oldLimx2,oldLimy2=limList[listInd-1][1],limList[listInd-1][2] #two back
             oldDx2,oldDy2=(oldLimx2[2]-oldLimx2[1]),(oldLimy2[2]-oldLimy2[1])
             oldDx,oldDy=(oldLimx[2]-oldLimx[1]),(oldLimy[2]-oldLimy[1])
-            if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.02#.05
+            if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.01#.05
                 dx=oldDx*1.01 #fix trajectory for a set amt of frames to prevent bounciness
                 dy=oldDy*1.01 #always opt for more space, but increase at slow rate
                 oscillating=true
@@ -412,7 +425,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                     oscillating=false
                     oscillatingCount=0
                 end
-            elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.02#.05
+            elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.01#.05
                 dx=oldDx*1.01
                 dy=oldDy*1.01
                 oscillating=true

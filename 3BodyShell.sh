@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+## first path is for old computer, second for new
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
+#PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 #specify ulimit explicitly just in case cron doesn't get the memo
 ulimit -n 4096
 ulimit -t unlimited
@@ -12,53 +14,71 @@ if [ -f $oldAnim ] ; then
     #remove all mp4 videos, not just oldAnim (with adding music others are created)
 fi
 LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
-./threeBodyProb.jl > $LOGFILE 2>&1 #log any specific errors generated in julia script
+nBody=$((1+RANDOM%10)) #1 and 10 chance of doing nBody simulation
+if [ $nBody -eq 1 ]; then
+  nBodies=$((1+RANDOM%20)) #20 is a lot, and I think close to the limit of what fits in tweet
+  cd nbody
+  ./requests.jl $nBodies 0 0 0  > $LOGFILE 2>&1
+  mv initCond.txt ../
+  cd ..
+  echo "*** special ${nBodies}-body problem ***"$'\n'"$(cat initCond.txt)" > initCond.txt
+else
+  ./threeBodyProb.jl > $LOGFILE 2>&1 #log any specific errors generated in julia script
+fi
 echo 'frames generated, running ffmpeg' >> /home/kirk/Documents/3Body/cron_log.txt
-cd tmpPlots
-</dev/null ffmpeg -framerate 30 -i "%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
+if [ $nBody -eq 1 ]; then
+  cd nbody/tmpPlots2
+else
+  cd tmpPlots
+fi
+if [ $nBody -eq 1 ]; then
+  </dev/null ffmpeg -framerate 30 -i "frame_%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
+else
+  </dev/null ffmpeg -framerate 30 -i "%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
+fi
 echo 'animation generated, removing png files' >> /home/kirk/Documents/3Body/cron_log.txt
 rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%17)) #get number between 1 and 9
+num=$((1+RANDOM%17)) #get number between 1 and 17
 if [ $num -eq 1 ]; then
-  echo 'Music: Adagio for Strings -- Barber' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Adagio for Strings – Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
-  echo 'Music: The Blue Danube Waltz -- Strauss' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: The Blue Danube Waltz – Strauss' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 3 ]; then
-  echo 'Music: Moonlight Sonata (1st Mvmt) -- Beethoven' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Moonlight Sonata (1st Mvmt) – Beethoven' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 4 ]; then
-  echo 'Music: Clair de Lune -- Debussy' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Clair de Lune – Debussy' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 5 ]; then
-  echo 'Music: Gymnopédie No. 1 -- Satie' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Gymnopédie No. 1 – Satie' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 6 ]; then
-  echo 'Music: Symphony No. 5 (1st Mvmt) -- Beethoven' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Symphony No. 5 (1st Mvmt) – Beethoven' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 7 ]; then
-  echo 'Music: First Step (Interstellar) -- Zimmer' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: First Step (Interstellar) – Zimmer' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 8 ]; then
-  echo 'Music: Time (Inception) -- Zimmer' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Time (Inception) – Zimmer' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 9 ]; then
-  echo 'Music: I Need a Ride (The Expanse) -- Shorter' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: I Need a Ride (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 10 ]; then
-  echo 'Music: Prelude in E Minor -- Chopin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in E Minor – Chopin' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 11 ]; then
-  echo 'Music: Prelude in C Sharp Minor (Posthumous) -- Chopin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in C-Sharp Minor (Posthumous) – Chopin' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 12 ]; then
-  echo 'Music: Battlestar Sonatica (BSG) -- McCreary' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Battlestar Sonatica (BSG) – McCreary' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 13 ]; then
-  echo 'Music: Rhapsody in Blue (solo piano) -- Gershwin' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Rhapsody in Blue – Gershwin' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 14 ]; then
-  echo 'Music: Passacaglia (BSG, solo piano) -- McCreary' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Passacaglia (BSG) – McCreary' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 15 ]; then
-  echo 'Music: Prelude in G Minor -- Rachmaninoff' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in G Minor – Rachmaninoff' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 16 ]; then
-  echo 'Music: Prelude in C Sharp Minor -- Rachmaninoff' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: Prelude in C-Sharp Minor – Rachmaninoff' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 17 ]; then
-  echo 'Music: The Shape of Things To Come (BSG, solo piano) -- McCreary' >> /home/kirk/Documents/3Body/nbody/initCond.txt
+  echo 'Music: The Shape of Things To Come (BSG) – McCreary' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 
-musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.mp3"
+musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
 videoFile="/home/kirk/Documents/3Body/3Body_fps30.mp4"
 combinedFile="3Body_fps30_wMusic.mp4"
 combinedAACOut="3Body_fps30_wMusicAAC.mp4"

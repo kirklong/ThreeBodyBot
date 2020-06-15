@@ -45,7 +45,7 @@ function upload_video(){
 	    console.error(err)
 	  }
       T.post('statuses/update', {
-	        status: 'Initial conditions:\n'+tweet_text // add to status text, attach to media, and tweet
+	        status: 'Initial conditions:\n'+tweet_text, // add to status text, attach to media, and tweet
           media_ids: [mediaIdStr]
         },
         function(err, data, response) {
