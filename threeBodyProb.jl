@@ -4,26 +4,26 @@ using Plots, Random, Printf
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
     function getMass(nBodies) #generate random masses that better reflect actual stellar populations
         mList=zeros(nBodies)
-        N=(1.5^(-1.3)-150^(-1.3))/1.3 #crude approximation of IMF integral assuming alpha = 2.3, stellar mass range of 0.5:150 solar masses
+        N=(0.5^(-1.3)-150^(-1.3))/1.3 #crude approximation of IMF integral assuming alpha = 2.3, stellar mass range of 0.5:150 solar masses
         rescale=1e6
         max=floor(Int,N*rescale)
         for i=1:nBodies
             intTarget=rand(0:max,1)[1]/rescale
-            m=(1.5^(-1.3)-intTarget*1.3)^(-1/1.3) #just algebra from above
+            m=(0.5^(-1.3)-intTarget*1.3)^(-1/1.3) #just algebra from above
             mList[i]=round(m,digits=2)
         end
         return mList
     end
-    #m=rand(1:1500,3)./10 #3 random masses between 0.1 and 150 solar masses, uniform distribution
-    m=getMass(3)
+    m=rand(1:1500,3)./10 #3 random masses between 0.1 and 150 solar masses, uniform distribution
+    #m=getMass(3) #get mass from IMF -- this way is kind of boring...so not using it, but left here in case I change my mind?
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
     rad=rad.*7e8 #convert to SI m
-    pos1=rand(-35:35,2) #random initial coordinates x & y for first body, AU
+    pos1=rand(-10:10,2) #random initial coordinates x & y for first body, AU
     function genPos2(pos1)
         accept2=false
         while accept2==false
-            pos2=rand(-35:35,2) #random initial coordinates for second body, AU
+            pos2=rand(-10:10,2) #random initial coordinates for second body, AU
             dist21=sqrt((pos1[1]-pos2[1])^2+(pos1[2]-pos2[2])^2)
             if (dist21*1.5e11)>(rad[1]+rad[2]) #they aren't touching
                 accept2=true
@@ -35,7 +35,7 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     function genPos3(pos1,pos2)
         accept3=false
         while accept3==false
-            pos3=rand(-35:35,2) #random initial coordinates for third body, AU
+            pos3=rand(-10:10,2) #random initial coordinates for third body, AU
             dist31=sqrt((pos1[1]-pos3[1])^2+(pos1[2]-pos3[2])^2)
             dist32=sqrt((pos2[1]-pos3[1])^2+(pos2[2]-pos3[2])^2)
             if (dist31*1.5e11)>(rad[1]+rad[3]) && (dist32*1.5e11)>(rad[2]+rad[3]) #3rd isn't touching either
@@ -150,7 +150,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     interesting=false
     i=1
     while interesting==false
-        plotData,t,m,rad=gen3Body([50,150],50000)
+        plotData,t,m,rad=gen3Body([50,150],500000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
@@ -255,15 +255,15 @@ end
 
 plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
 threeBodyAnim=Animation(plotLoadPath,String[])
-for i=1:33:length(t) #this makes animation scale ~1 sec/year with other conditions
+for i=1:333:length(t) #this makes animation scale ~1 sec/year with other conditions
     GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
     gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
     limx,limy=getLims(pos./1.5e11,10) #convert to AU, 10 AU padding
-    p=plot(plotData[1][1:i]./1.5e11,plotData[2][1:i]./1.5e11,label="",linecolor=colors[1],linealpha=max.((1:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
-    p=plot!(plotData[3][1:i]./1.5e11,plotData[4][1:i]./1.5e11,label="",linecolor=colors[2],linealpha=max.((1:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
-    p=plot!(plotData[5][1:i]./1.5e11,plotData[6][1:i]./1.5e11,label="",linecolor=colors[3],linealpha=max.((1:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+    p=plot(plotData[1][1:33:i]./1.5e11,plotData[2][1:33:i]./1.5e11,label="",linecolor=colors[1],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
+    p=plot!(plotData[3][1:33:i]./1.5e11,plotData[4][1:33:i]./1.5e11,label="",linecolor=colors[2],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
+    p=plot!(plotData[5][1:33:i]./1.5e11,plotData[6][1:33:i]./1.5e11,label="",linecolor=colors[3],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
     p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
     star1=makeCircleVals(rad[1],[plotData[1][i],plotData[2][i]]) #generate circles with appropriate sizes for each star
     star2=makeCircleVals(rad[2],[plotData[3][i],plotData[4][i]]) #at current positions
@@ -273,7 +273,7 @@ for i=1:33:length(t) #this makes animation scale ~1 sec/year with other conditio
     p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
     p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
         background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
-    p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) yrs after start",
+    p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start",
         legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
         grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
     frame(threeBodyAnim,p) #generate the frame

@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 using Plots, Random, Printf, Plots.PlotMeasures
-println("hello!!!!")
+include("IMF.jl") #new way to make random masses more "realistic"?
 function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random initial conditions for mass/radius, position, and velocity, option for user to specify acceptable vRange and posRange
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
@@ -236,6 +236,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 else
                     iter+=1
                     mLocal=rand(1:1500,nBodies0)./10 #pick new random masses
+                    #mLocal=getMass(nBodies0) IMF way, not currently used because it's boring
                 end
             end
         end
@@ -473,9 +474,9 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
             background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
         currentT=t[i]/365/24/3600+tOffset
-        titleString="Random $nBodies Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
+        titleString="Random $nBodies-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
         if landscape==1
-            titleString="Random $nBodies Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
+            titleString="Random $nBodies-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
@@ -581,6 +582,7 @@ if labelBool==1
     end
 else
     mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
+    #mStart=getMass(nBodies) #IMF way, but boring so not used right now
     labels=["$(mStart[i])" for i=1:nBodies]
 end
 
@@ -588,7 +590,7 @@ names=copy(labels)
 nBodies0=copy(nBodies)
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,mStart,names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-50,50])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,mStart,names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-35,35])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars

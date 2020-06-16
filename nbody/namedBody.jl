@@ -47,10 +47,15 @@ function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random 
     for n=1:nBodies
         push!(r,v[n]) #v is second half of r
     end
-    open("initCond.txt","w") do f #save initial conditions to file in folder where script is run
+    open("initCondAll.txt","w") do f #save initial conditions to file in folder where script is run
        for n=1:nBodies
            write(f,"body $n info: m = $(@sprintf("%.1f",(m[n]/2e30))) solar masses | v = ($(v[n][1]/1e3),$(v[n][2]/1e3)) km/s | starting position = ($(pos[n][1]/1.5e11),$(pos[n][2]/1.5e11)) AU from center\n")
        end
+    end
+    open("initCond.txt","w") do f
+        for n=1:nBodies
+            write(f,"m$n = $(@sprintf("%.1f",(m[n]/2e30)))")
+        end
     end
     return [r, rad, m]
 end
@@ -461,15 +466,15 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
             background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
         currentT=t[i]/365/24/3600+tOffset
-        titleString="Random $nBodies Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
+        titleString="Random $nBodies-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
         if landscape==1
-            titleString="Random $nBodies Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
+            titleString="Random $nBodies-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
             grid=false,titlefont=font(24,"Courier"),legendfontsize=11,legendtitle="Mass (in solar masses)",legendtitlefontsize=11,top_margin=4mm) #add in axes/title/legend with formatting
         plotNum+=1
-        png(p,@sprintf("tmpPlots2/frame_%06d.png",plotNum))
+        png(p,@sprintf("tmpPlots/frame_%06d.png",plotNum))
         closeall() #close plots
         I+=skipRate
     end
@@ -576,7 +581,7 @@ nBodies0=copy(nBodies)
 m=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-50,50])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[60,500],minTime=50,posRange=[-50,50])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
