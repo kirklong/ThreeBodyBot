@@ -2,7 +2,20 @@
 using Plots, Random, Printf
 
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
-    m=rand(1:1500,3)./10 #3 random masses between 0.1 and 150 solar masses
+    function getMass(nBodies) #generate random masses that better reflect actual stellar populations
+        mList=zeros(nBodies)
+        N=(1.5^(-1.3)-150^(-1.3))/1.3 #crude approximation of IMF integral assuming alpha = 2.3, stellar mass range of 0.5:150 solar masses
+        rescale=1e6
+        max=floor(Int,N*rescale)
+        for i=1:nBodies
+            intTarget=rand(0:max,1)[1]/rescale
+            m=(1.5^(-1.3)-intTarget*1.3)^(-1/1.3) #just algebra from above
+            mList[i]=round(m,digits=2)
+        end
+        return mList
+    end
+    #m=rand(1:1500,3)./10 #3 random masses between 0.1 and 150 solar masses, uniform distribution
+    m=getMass(3)
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
     rad=rad.*7e8 #convert to SI m
@@ -145,7 +158,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             end
             return plotData,t,m,rad
             interesting=true
-        elseif i>30 #computationally expensive so don't want to go forever
+        elseif i>50 #computationally expensive so don't want to go forever
             interesting=true #render it anyways I guess because sometimes it's fun?
             println("did not find interesting solution in number of tries allotted, running anyways")
             println(maximum(t)/yearSec) #how many years simulation runs for
@@ -224,7 +237,7 @@ function makeCircleVals(r,center=[0,0])
 end
 
 plotData,t,m,rad=getInteresting3Body(15)
-c=[:DodgerBlue,:Gold,:Crimson] #most massive to least massive, also roughly corresponds to temp
+c=[:DodgerBlue,:Gold,:Tomato] #most massive to least massive, also roughly corresponds to temp
 colors=getColors(m,c)
 #adding fake stars
 numStars=2500
