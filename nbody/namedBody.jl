@@ -218,14 +218,14 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
             iter=1
             while accept==false
                 if iter==1
-                    m0=m0
+                    mInit=m0
                 else
-                    m0=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
+                    mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
                 end
-                physInfo0=initCondGen(nBodies0,m0,vRange=vRange,posRange=posRange) #get initial conditions
+                physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
                 plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                if t>(stopT/5) || iter>499 #no computer melting
+                if t>(stopT/5) || iter>999 #no computer melting
                     println("found a solution with a first step t = $t years in $iter iterations")
                     return plotInfo,newPhysInfo,nBodies,names,colors,t,rad,m
                     accept=true
@@ -355,6 +355,10 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
     if landscape==1
         ratio=1920/1080
     end
+    ejectBan=[]
+    for n=1:nBodies
+        push!(ejectBan,[0,0]) #initialize banBool,Counter for each body
+    end
     for i=1:skipRate:length(t) #this makes animation scale ~1 sec/year with other conditions
         GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
         gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
@@ -372,8 +376,32 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         y=[]
         for n=1:nBodies
             if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
-                push!(x,xData[n][i]/1.5e11)
-                push!(y,yData[n][i]/1.5e11)
+                if ejectBan[n][1]==0 || ejectBan[n][2]>60 #let it be considered again after 60 frames
+                    push!(x,xData[n][i]/1.5e11)
+                    push!(y,yData[n][i]/1.5e11)
+                    ejectBan[n][1]=0
+                    ejectBan[n][2]=0
+                end
+            else
+                ejectBan[n][1]=1
+                ejectBan[n][2]+=1 #it's stayed ejected another frame
+            end
+        end
+        if length(x) == 0
+            println("all bodies ejected, stopping plotting")
+            return 0
+        end
+        for n=1:nBodies
+            if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
+                if ejectBan[n][1]==0 || ejectBan[n][2]>60 #let it be considered again after 60 frames
+                    push!(x,xData[n][i]/1.5e11)
+                    push!(y,yData[n][i]/1.5e11)
+                    ejectBan[n][1]=0
+                    ejectBan[n][2]=0
+                end
+            else
+                ejectBan[n][1]=1
+                ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
         if length(x) == 0
@@ -382,45 +410,32 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         end
         oldCenter=copy(center)
         limx,limy,center=getLims(x,y,20,maxFrame,oldCenter,landscape) #20 AU padding
-        push!(limList,[limx,limy])
-        if i>1
-            oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
-            if (limx[1]/oldLimx[1])<0.95 #frame shrunk more than 10%
-                limx[1]=oldLimx[1]*0.95
-            elseif (limx[2]/oldLimx[2])<0.95
-                limx[2]=oldLimx[2]*0.95
-            elseif (limy[1]/oldLimy[1])<0.95
-                limy[1]=oldLimy[1]*0.95
-            elseif (limy[2]/oldLimy[2])<0.95
-                limy[2]=oldLimy[2]*0.95
-            elseif (limx[1]/oldLimx[1])>1.05 #frame grew more than 10%
-                limx[1]=oldLimx[1]*1.05
-            elseif (limx[2]/oldLimx[2])>1.05
-                limx[2]=oldLimx[2]*1.05
-            elseif (limy[1]/oldLimy[1])>1.05
-                limy[1]=oldLimy[1]*1.05
-            elseif (limy[2]/oldLimy[2])>1.05
-                limy[2]=oldLimy[2]*1.05
-            end
-        end
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
         if listInd>2 #this block will hopefully prevent the camera from oscillating back and forth..? (for a 10 frames right now)
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2] #one back
             oldLimx2,oldLimy2=limList[listInd-1][1],limList[listInd-1][2] #two back
             oldDx2,oldDy2=(oldLimx2[2]-oldLimx2[1]),(oldLimy2[2]-oldLimy2[1])
             oldDx,oldDy=(oldLimx[2]-oldLimx[1]),(oldLimy[2]-oldLimy[1])
-            if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.05
-                dx=oldDx*1.01 #fix trajectory for a set amt of frames to prevent bounciness
-                dy=oldDy*1.01 #always opt for more space, but increase at slow rate
+            if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.02#.05
+                dx=oldDx*1.02 #fix trajectory for a set amt of frames to prevent bounciness
+                dy=oldDy*1.02 #always opt for more space, but increase at slow rate
+                if dx>oldDx && oldDx2>oldDx
+                    dx=oldDx*0.98
+                    dy=oldDy*0.98
+                end
                 oscillating=true
                 oscillatingCount+=1
                 if oscillatingCount>30
                     oscillating=false
                     oscillatingCount=0
                 end
-            elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.05
-                dx=oldDx*1.01
-                dy=oldDy*1.01
+            elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.02#.05
+                dx=oldDx*1.02
+                dy=oldDy*1.02
+                if dy>oldDy && oldDy2>oldDy
+                    dx=oldDx*0.98
+                    dy=oldDy*0.98
+                end
                 oscillating=true
                 oscillatingCount+=1
                 if oscillatingCount>30
@@ -429,8 +444,8 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 end
             else
                 if oscillating==true
-                    dx=oldDx*1.01
-                    dy=oldDy*1.01
+                    dx=oldDx*1.005#.01
+                    dy=oldDy*1.005#.01
                     oscillatingCount+=1
                     if oscillatingCount>30 #1 sec at 30 FPS
                         oscillating=false #don't want to freeze the frame forever...
@@ -440,9 +455,29 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             end
         end
         dx,dy=getRatioRight(ratio,dx,dy)
+        if i>1
+            oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
+            oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
+            if dx/oldDx<0.95 #frame shrunk more than 5%
+                limx[1]=oldCenter[1]-oldDx*0.95/2
+                limx[2]=oldCenter[1]+oldDx*0.95/2
+            elseif dx/oldDx>1.05 #grew more than 5%
+                limx[1]=oldCenter[1]-oldDx*1.05/2
+                limx[2]=oldCenter[1]+oldDx*1.05/2
+            elseif dy/oldDy<0.95
+                limy[1]=oldCenter[2]-oldDy*0.95/2
+                limy[2]=oldCenter[2]+oldDy*0.95/2
+            elseif dy/oldDy>1.05
+                limy[1]=oldCenter[2]-oldDy*1.05/2
+                limy[2]=oldCenter[2]+oldDy*1.05/2
+            end
+        end
+        listInd+=1
+        dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
+        dx,dy=getRatioRight(ratio,dx,dy)
         limx[2]=limx[1]+dx
         limy[2]=limy[1]+dy
-        listInd+=1
+        push!(limList,[limx,limy])
         for n=1:nBodies
             p=plot!(xData[n][1:Int(floor(skipRate/10)):i]./1.5e11,yData[n][1:Int(floor(skipRate/10)):i]./1.5e11,label="",linecolor=colorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):i) .+ 10000 .- i,1000)/10000)
         end
