@@ -110,6 +110,8 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         split1,split2=split(names[n1]),split(names[n2])
                         if split1[end]=="hole" || split2[end]=="hole"
                             minSep*=10 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
+                        elseif split1[end]=="hole" && split2[end]=="hole"
+                            minSep*=1000 #two black holes are V SMOL
                         end
                         if sep<minSep
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
@@ -222,7 +224,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
             accept=false
             iter=1
             mLocal=copy(m0)
-            iMax=999
+            iMax=499
             global labelBool
             if labelBool==1
                 iMax=0 #we set the mass in init cond
@@ -236,7 +238,8 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
                 plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                if t>(stopT/5) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
+                #println("t for iteration $iter = $t")c
+                if t>(stopT/10) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
                     println("found a solution with a first step t = $t years in $iter iterations")
                     namesList=[["$(mLocal[i])" for i=1:length(m0)],names]
                     return plotInfo,newPhysInfo,nBodies,namesList,colors,t,rad,m
@@ -277,7 +280,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
     return numTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList
 end
 
-function getInterestingNBody(nBodies,m,names,colors; minTime=0,stopCond=[10,100],dt=0.033,iMax=10,vRange=[-7e3,7e3],posRange=[-35,35]) #units of things in yrs, AU
+function getInterestingNBody(nBodies,m,names,colors; minTime=0,stopCond=[10,100],dt=0.033,iMax=10,vRange=[-7e3,7e3],posRange=[-50,50]) #units of things in yrs, AU
     #sometimes random conditions result in a really short animation where things
     #just crash into each other/fly away, so this function throws away those
     #comments above from threeBody code -- since I allow collisions now this pretty much always runs all the way through first try but good to have just in case
@@ -488,7 +491,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 fillColor=colorSymbols[n]
             end
             circleX,circleY=makeCircleVals(currentRad,[xData[n][i],yData[n][i]])
-            if xData[n][i]/1.5e11 > limx[2]*1.25 || yData[n][i]/1.5e11 > limy[2]*1.25 || xData[n][i]/1.5e11 < limx[1]*1.25 || yData[n][i]/1.5e11 < limy[1]*1.25 #it's out of the frame
+            if xData[n][i]/1.5e11 > limx[2] || yData[n][i]/1.5e11 > limy[2] || xData[n][i]/1.5e11 < limx[1] || yData[n][i]/1.5e11 < limy[1] #it's out of the frame
                 plotLabel=string(plotLabel," (ejected)")
             end
             p=plot!(circleX./1.5e11,circleY./1.5e11,label=plotLabel,linecolor=colorSymbols[n],fill=true,fillcolor=fillColor)
@@ -612,7 +615,7 @@ names=copy(labels)
 nBodies0=copy(nBodies)
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,mStart,names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-35,35])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-50,50])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars

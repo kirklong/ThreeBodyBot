@@ -105,6 +105,12 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         sep=sqrt((x1-x2)^2+(y1-y2)^2)
                         push!(sepList,sep) #get all the separations in a list
                         minSep=rad[n1]+rad[n2] #no touching!
+                        split1,split2=split(names[n1]),split(names[n2])
+                        if split1[end]=="hole" || split2[end]=="hole"
+                            minSep*=10 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
+                        elseif split1[end]=="hole" && split2[end]=="hole"
+                            minSep*=1000 #two black holes are V SMOL
+                        end
                         if sep<minSep
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
                             sharedY=(y1+y2)/2
@@ -121,7 +127,6 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                             r[n2]=true #mark for removal
                             r[n2+nBodies]=true
                             filter!(x->x!=true,r) #filter and remove n2 entries, because now there's only 1 body from this pair
-                            split1,split2=split(names[n1]),split(names[n2])
                             if split1[end]=="hole" #this is bookkeeping to make sure labels stay right on plot
                                 names[n1]=names[n1][1:(end-11)] #remove "black hole" from end of label to avoid things like "1 & 2 black hole & 3 black hole"
                             elseif split2[end]=="hole"
@@ -493,7 +498,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 fillColor=colorSymbols[n]
             end
             circleX,circleY=makeCircleVals(currentRad,[xData[n][i],yData[n][i]])
-            if xData[n][i]/1.5e11 > limx[2]*1.25 || yData[n][i]/1.5e11 > limy[2]*1.25 || xData[n][i]/1.5e11 < limx[1]*1.25 || yData[n][i]/1.5e11 < limy[1]*1.25 #it's out of the frame
+            if xData[n][i]/1.5e11 > limx[2] || yData[n][i]/1.5e11 > limy[2] || xData[n][i]/1.5e11 < limx[1] || yData[n][i]/1.5e11 < limy[1] #it's out of the frame
                 plotLabel=string(plotLabel," (ejected)")
             end
             p=plot!(circleX./1.5e11,circleY./1.5e11,label=plotLabel,linecolor=colorSymbols[n],fill=true,fillcolor=fillColor)
