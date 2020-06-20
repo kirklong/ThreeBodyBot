@@ -28,7 +28,7 @@ To tweet from a script you need a developer account with Twitter so that you can
 
 ## Want to generate your own animations?
 
-***Overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org related to Black Lives Matter and I will do the heavy lifting for you! I will happily make you a classic three-body version, or you can request one of my new fancy n-body simulations – you can even pick colors and name the stars!  ***Now back to the details...***
+***Overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org related to Black Lives Matter and I will do the heavy lifting for you! I will happily make you a classic three-body version, a 3D three-body version, or you can request one of my new fancy new n-body simulations – you can even pick colors and name the stars!  ***Now back to the details...***
 
 To make the classic three-body animations with this code all you really need to download is the `threeBodyProb.jl` script. There are comments there that hopefully explain how to use it and change the options so that you can start generating your own interesting systems! If you want to specify initial conditions (instead of having them be randomly generated) this script should be easy to modify to accomplish that goal.
 
