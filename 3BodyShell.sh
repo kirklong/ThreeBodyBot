@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## first path is for old computer, second for new
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
+#PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
 #PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 #specify ulimit explicitly just in case cron doesn't get the memo
 ulimit -n 4096
@@ -16,6 +16,7 @@ fi
 LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
 nBody=$((1+RANDOM%10)) #1 and 10 chance of doing nBody simulation
 if [ $nBody -eq 1 ]; then
+  echo 'n-body simulation!' >> /home/kirk/Documents/3Body/cron_log.txt
   nBodies=$((4+RANDOM%20)) #20 is a lot, and I think close to the limit of what fits in tweet
   cd nbody
   ./requests.jl $nBodies 0 0 0  > $LOGFILE 2>&1
@@ -41,7 +42,7 @@ rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%17)) #get number between 1 and 17
+num=$((1+RANDOM%22)) #get number between 1 and 22
 if [ $num -eq 1 ]; then
   echo 'Music: Adagio for Strings – Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
@@ -76,6 +77,16 @@ elif [ $num -eq 16 ]; then
   echo 'Music: Prelude in C-Sharp Minor – Rachmaninoff' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 17 ]; then
   echo 'Music: The Shape of Things To Come (BSG) – McCreary' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 18 ]; then
+  echo 'Music: Prelude in C Major – Bach' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 19 ]; then
+  echo 'Music: Liebestraum – Liszt' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 20 ]; then
+  echo 'Music: Where is My Mind? – Pixies/Cyrin' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 21 ]; then
+  echo 'Music: Lost (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 22 ]; then
+  echo 'Music: What Did You Do (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 
 musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
