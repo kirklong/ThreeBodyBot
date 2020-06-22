@@ -33,7 +33,7 @@ To tweet from a script you need a developer account with Twitter so that you can
 To make the classic three-body animations with this code all you really need to download is the `threeBodyProb.jl` script. There are comments there that hopefully explain how to use it and change the options so that you can start generating your own interesting systems! If you want to specify initial conditions (instead of having them be randomly generated) this script should be easy to modify to accomplish that goal.
 
 You should be able to generate an animation right away without changing any settings simply by uncommenting the code in `threeBodyProb.jl` past line 295 and commenting out the code segment between lines 256 and 281. If run this way an animation should be generated in the folder where the script was run from. For more advanced control over how the animations are generated you will need to generate the animation frames using the method on lines 256-281, and you will need to specify a file path where you want the frames to be saved on line 256. That method also generates the frames ***significantly*** faster. If there is enough interest (or enough confusion) I will try to make a more generalized version of the script that doesn't depend on explicit file paths. Once the frames are generated you need to stitch them together using something like FFmpeg – there are some example commands commented out in the julia script on lines 286 and 287. If you want to make 3D versions of three-body problems do something similar with the `threeBody3D.jl` script. 
-.
+
 The `3BodySetup.ipynb` notebook is more of the stream of consciousness I had while creating this project and testing different things, but it may be useful if you want to see how things are tweaked (but it's not very well documented sorry).
 
 The shell script (`3BodyShell.sh`) depends almost entirely on filepaths to my machine and requires use of the Twitter API through the `server.js` script but is a good template to base your own off of (if you desire), and the FFmpeg command there by itself may be useful. It's also fun if you just want to see the entire pipeline for how the animations get generated and posted start to finish.
@@ -140,5 +140,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   21. Lost (from The Expanse season 2 soundtrack) – Shorter (piano cover and recording by me)
   
   22. What Did You Do (from The Expanse season 2 soundtrack) – Shorter (piano cover and recording by me)
+  
+  23. [Waltz of the Flowers – Tchaikovsky](https://www.youtube.com/watch?v=QxHkLdQy5f0)
   
 **Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith – they have either not replied or granted permission for this limited use. I've also tried to record my own versions of all pieces used (when possible), putting my music minor to good use and hopefully further mitigating any copyright issues. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
