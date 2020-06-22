@@ -158,12 +158,12 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             end
             return plotData,t,m,rad
             interesting=true
-        elseif i>50 #computationally expensive so don't want to go forever
+        elseif i>1000 #computationally expensive so don't want to go forever
             interesting=true #render it anyways I guess because sometimes it's fun?
             println("did not find interesting solution in number of tries allotted, running anyways")
             println(maximum(t)/yearSec) #how many years simulation runs for
             open("cron_log.txt","a") do f #for cron logging
-                write(f,"$(maximum(t)/yearSec)\n")
+                write(f,"found a solution with t = $(maximum(t)/yearSec) in $i iterations\n")
             end
             return plotData,t,m,rad
         end
