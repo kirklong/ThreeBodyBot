@@ -111,7 +111,7 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         if split1[end]=="hole" || split2[end]=="hole"
                             minSep*=10 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
                         elseif split1[end]=="hole" && split2[end]=="hole"
-                            minSep*=1000 #two black holes are V SMOL
+                            minSep*=100000 #two black holes are V SMOL
                         end
                         if sep<minSep
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
@@ -224,7 +224,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
             accept=false
             iter=1
             mLocal=copy(m0)
-            iMax=499
+            iMax=1999
             global labelBool
             if labelBool==1
                 iMax=0 #we set the mass in init cond
@@ -233,7 +233,8 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 if iter==1
                     mInit=m0
                 else
-                    mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
+                    #mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
+                    mInit=getMass(nBodies0) #IMF way
                 end
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
@@ -241,7 +242,10 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 #println("t for iteration $iter = $t")c
                 if t>(stopT/10) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
                     println("found a solution with a first step t = $t years in $iter iterations")
-                    namesList=[["$(mLocal[i])" for i=1:length(m0)],names]
+                    open("cron_log.txt","a") do f #for cron logging, a flag = append
+                        write(f,"found a solution with first step t = $t after $iter iterations\n")
+                    end
+                    namesList=[["$(mInit[i])" for i=1:length(mInit)],names]
                     return plotInfo,newPhysInfo,nBodies,namesList,colors,t,rad,m
                     accept=true
                 else
@@ -505,7 +509,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
-            grid=false,titlefont=font(24,"Courier"),legendfontsize=11,legendtitle="Mass (in solar masses)",legendtitlefontsize=11,top_margin=4mm) #add in axes/title/legend with formatting
+            grid=false,titlefont=font(18,"Courier"),legendfontsize=9,legendtitle="Mass (in solar masses)",legendtitlefontsize=10,top_margin=4mm) #add in axes/title/legend with formatting
         plotNum+=1
         png(p,@sprintf("tmpPlots2/frame_%06d.png",plotNum))
         closeall() #close plots
@@ -590,7 +594,15 @@ elseif colorBool==2 #a nice set of color presets I like for 7 bodies
     colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink"]
 else
     println("using randomly generated colors")
+    accept=false
     randInd=rand(1:length(validColors),nBodies)
+    while accept==false
+        if length(unique(randInd))==length(randInd)
+            accept=true
+        else
+            randInd=rand(1:length(validColors),nBodies)
+        end
+    end
     colors=[validColors[i] for i in randInd]
 end
 
@@ -606,8 +618,8 @@ if labelBool==1
         push!(mStart,parse(Float64,name))
     end
 else
-    mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
-    #mStart=getMass(nBodies) #IMF way, but boring so not used right now
+    #mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
+    mStart=getMass(nBodies) #IMF way, but boring so not used right now
     labels=["$(mStart[i])" for i=1:nBodies]
 end
 
@@ -615,7 +627,7 @@ names=copy(labels)
 nBodies0=copy(nBodies)
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.0001,stopCond=[50,500],minTime=40,posRange=[-50,50])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.00005,stopCond=[50,500],minTime=40,posRange=[-35,35],vRange=[-7e3,7e3])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
@@ -670,4 +682,4 @@ for i=1:numStars
 end
 landscape=parse(Int,ARGS[4])
 #STEP 3: plot data with parameters (note that dt and maxFrame must be duplicated as is, should probably have user pass them in and store to var)
-plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsList,100,tOffsets,0.0001,slowDown=1)
+plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsList,100,tOffsets,0.00005,slowDown=1)
