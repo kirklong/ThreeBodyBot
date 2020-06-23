@@ -2,6 +2,7 @@
 
 ## first path is for old computer, second for new
 #PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
+PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/home/kirk/perl5/perlbrew/bin:/home/kirk/perl5/perlbrew/perls/perl-5.24.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 #PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 #specify ulimit explicitly just in case cron doesn't get the memo
 ulimit -n 4096
@@ -42,7 +43,7 @@ rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%22)) #get number between 1 and 22
+num=$((1+RANDOM%23)) #get number between 1 and 23
 if [ $num -eq 1 ]; then
   echo 'Music: Adagio for Strings – Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
@@ -87,6 +88,8 @@ elif [ $num -eq 21 ]; then
   echo 'Music: Lost (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 22 ]; then
   echo 'Music: What Did You Do (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 23 ]; then
+  echo 'Music: Waltz of the Flowers – Tchaikovsky' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 
 musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
