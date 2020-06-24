@@ -95,7 +95,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
 
-* Thanks to my research advisory Dr. Daryl Macomb for not replying to my research questions right away, which gave me the free time over winter break to initially create this bot.
+* Thanks to my research advisory Dr. Daryl Macomb for not answering my research questions right away and giving me the free time over winter break to initially create this bot.
 
 * Musical selections that accompany animations:
 
