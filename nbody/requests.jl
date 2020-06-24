@@ -594,16 +594,22 @@ elseif colorBool==2 #a nice set of color presets I like for 7 bodies
     colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink"]
 else
     println("using randomly generated colors")
-    accept=false
-    randInd=rand(1:length(validColors),nBodies)
-    while accept==false
-        if length(unique(randInd))==length(randInd)
-            accept=true
-        else
-            randInd=rand(1:length(validColors),nBodies)
+    function getUniqueColors(nBodies,validColors)
+        accept=false
+        while accept==false
+            global randInd=rand(1:length(validColors),nBodies) #global because julia scope and I'm too lazy to do this right
+            #println("I'm stuck here")
+            println("$(length(unique(randInd))), $(length(randInd))")
+            if length(unique(randInd))==length(randInd)
+                accept=true #make sure that all entries are unique so no colors are duplicated
+                break
+            end
         end
+        colors=[validColors[i] for i in randInd]
+        return colors
     end
-    colors=[validColors[i] for i in randInd]
+    colors=getUniqueColors(nBodies,validColors)
+    println("i've got the colors")
 end
 
 labelBool=parse(Int,ARGS[3])
