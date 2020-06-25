@@ -114,6 +114,9 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                             minSep*=100000 #two black holes are V SMOL
                         end
                         if sep<minSep
+                            println("collision between indices $n1 and $n2")
+                            #println("names before modification: $names")
+                            #println("masses before modification: $(m./2e30)")
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
                             sharedY=(y1+y2)/2
                             p1x,p1y=m[n1]*r[n1+nBodies][1],m[n1]*r[n1+nBodies][2] #get initial momenta from each body
@@ -143,6 +146,8 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                             newRad=2*(6.6743015e-11)*newMass/(9e16) #schwarzschild radius -- might change because it's tiny on plots but whatever
                             rad[n1]=newRad #update radii list to reflect merger
                             deleteat!(rad,n2) #get rid of the other one
+                            #println("names after modification: $names")
+                            #println("masses after modification: $(m./2e30)")
                             return true,r,nBodies-1,names,colors,m,rad #now we have 1 less body so return updated info!
                         end
                     end
@@ -238,14 +243,15 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 end
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
-                plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
+                newNames=["$(mInit[i])" for i=1:length(mInit)]
+                plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,newNames,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
                 #println("t for iteration $iter = $t")c
                 if t>(stopT/10) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
                     println("found a solution with a first step t = $t years in $iter iterations")
                     open("cron_log.txt","a") do f #for cron logging, a flag = append
                         write(f,"found a solution with first step t = $t after $iter iterations\n")
                     end
-                    namesList=[["$(mInit[i])" for i=1:length(mInit)],names]
+                    namesList=[newNames,names]
                     return plotInfo,newPhysInfo,nBodies,namesList,colors,t,rad,m
                     accept=true
                 else
@@ -547,6 +553,7 @@ function plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsLis
         currentPlotData=plotList[i]
         currentPhysInfo=physInfoList[i]
         currentNames=namesList[i]
+        println("names at step $i = $currentNames")
         currentColors=colorsList[i]
         if i>1
             oldColors=colorsList[1]
