@@ -99,5 +99,5 @@ combinedAACOut="3Body_fps30_wMusicAAC.mp4"
 ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine audio w/video
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
 cd twitterbot
-./server.js
+#./server.js
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt

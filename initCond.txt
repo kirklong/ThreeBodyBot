@@ -1,4 +1,4 @@
-m1=37.1 m2=47.8 m3=103.9 (solar masses)
-v1x=-4.59 v1y=-6.515 v2x=2.003 v2y=5.225 v3x=-6.495 v3y=-0.068 (km/s)
-x1=-24 y1=-25 x2=3 y2=9 x3=7 y3=-26 (AU from center) 
-Music: Moonlight Sonata (1st Mvmt) -- Beethoven
+m1=52.1 m2=92.0 m3=20.8 (solar masses)
+v1x=2.225 v1y=-1.932 v2x=0.428 v2y=2.713 v3x=-6.163 v3y=3.795 (km/s)
+x1=-6 y1=3 x2=5 y2=-7 x3=1 y3=1 (AU from center) 
+Music: Time (Inception) – Zimmer

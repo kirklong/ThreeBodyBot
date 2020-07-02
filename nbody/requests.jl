@@ -597,8 +597,11 @@ if colorBool==1
             end
         end
     end
-elseif colorBool==2 #a nice set of color presets I like for 7 bodies
-    colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink"]
+elseif colorBool==2 #a nice set of color presets I like
+    colorChoices=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink",
+                    "orange","thistle","violet","yellowgreen","whitesmoke","rosybrown","peachpuff",
+                    "paleturqoise","orchid","orangered","limegreen","goldenrod","fuchsia","bisque"]
+    colors=colorChoices[1:nBodies]
 else
     println("using randomly generated colors")
     function getUniqueColors(nBodies,validColors)
@@ -616,7 +619,6 @@ else
         return colors
     end
     colors=getUniqueColors(nBodies,validColors)
-    println("i've got the colors")
 end
 
 labelBool=parse(Int,ARGS[3])

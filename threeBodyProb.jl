@@ -384,7 +384,7 @@ for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
 end
 if collisionBool==true #this condition makes 2 seconds of slo-mo right before the collision
     println("making collision cam")
-    for i=1:10:600
+    for i=0:10:600
         GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
         gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
         print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
@@ -405,7 +405,7 @@ if collisionBool==true #this condition makes 2 seconds of slo-mo right before th
         p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end-(600-i)]/365/24/3600)) years after start",
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
-        p=annotate!((limx[1]+(limx[2]-limx[1])/10,limy[2]-(limy[2]-limy[1])/10,Plots.text("COLLISION CAM (slo-mo x 33)",10,"Courier",:white,:left)))
+        p=annotate!((limx[1]+(limx[2]-limx[1])/20,limy[2]-(limy[2]-limy[1])/20,Plots.text("COLLISION CAM (slo-mo x 33)",12,"Courier",:orange,:left)))
         png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
         global frameNum+=1
         closeall() #close plots
