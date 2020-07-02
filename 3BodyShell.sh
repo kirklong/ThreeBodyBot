@@ -15,10 +15,10 @@ if [ -f $oldAnim ] ; then
     #remove all mp4 videos, not just oldAnim (with adding music others are created)
 fi
 LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
-nBody=$((1+RANDOM%10)) #1 and 10 chance of doing nBody simulation
+nBody=$((1+RANDOM%7)) #1 and 7 chance of doing nBody simulation
 if [ $nBody -eq 1 ]; then
   echo 'n-body simulation!' >> /home/kirk/Documents/3Body/cron_log.txt
-  nBodies=$((4+RANDOM%20)) #20 is a lot, and I think close to the limit of what fits in tweet
+  nBodies=$((4+RANDOM%16)) #20 is a lot, and I think close to the limit of what fits in tweet
   cd nbody
   ./requests.jl $nBodies 0 0 0  > $LOGFILE 2>&1
   mv initCond.txt ../
@@ -36,7 +36,7 @@ fi
 if [ $nBody -eq 1 ]; then
   </dev/null ffmpeg -framerate 30 -i "frame_%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
 else
-  </dev/null ffmpeg -framerate 30 -i "%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
+  </dev/null ffmpeg -framerate 30 -i "frame_%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -fs 15M -vf "scale=720:720,setdar=1/1" "/home/kirk/Documents/3Body/3Body_fps30.mp4"
 fi
 echo 'animation generated, removing png files' >> /home/kirk/Documents/3Body/cron_log.txt
 rm *.png

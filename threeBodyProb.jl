@@ -1,6 +1,8 @@
 #!/usr/bin/env julia
 using Plots, Random, Printf
 
+global collisionBool=false #lazy way to keep track of whether we want to add "collision cam" at the end
+
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
     function getMass(nBodies) #generate random masses that better reflect actual stellar populations
         mList=zeros(nBodies)
@@ -127,6 +129,11 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             sep23=sqrt((x3[i]-x2[i])^2+(y3[i]-y2[i])^2)
 
             if sep12<min12 || sep13<min13 || sep23<min23 || sep12>sepStop || sep13>sepStop || sep23>sepStop
+                if sep12<min12 || sep13<min13 || sep23<min23
+                    global collisionBool=true
+                else
+                    global collisionBool=false
+                end
                 stop=true #stop if collision happens or body is ejected
                 t=range(0,stop=currentT,length=i) #t should match pos vectors
                 x1=x1[1:i] #don't want trailing zeros
@@ -158,7 +165,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             end
             return plotData,t,m,rad
             interesting=true
-        elseif i>1000 #computationally expensive so don't want to go forever
+        elseif i>1999 #computationally expensive so don't want to go forever
             interesting=true #render it anyways I guess because sometimes it's fun?
             println("did not find interesting solution in number of tries allotted, running anyways")
             println(maximum(t)/yearSec) #how many years simulation runs for
@@ -189,7 +196,7 @@ function getLims(pos,padding) #determines plot limits at each frame, padding in 
         xlims=[xMin-padding,xMin+dy+padding]
         ylims=[yMin-padding,yMax+padding]
     end
-    return xlims,ylims
+    return xlims,ylims,[sum(x)/3,sum(y)/3]
 end
 
 function getColors(m,c) #places colors of objects according to mass/size
@@ -252,15 +259,110 @@ end
 #this new way runs significantly faster (~2x improvement over @anim)
 #Downside is it spams folder with png images of every frame and must manually compile with ffmpeg
 #Comment out and use older way (after this below) if performance/specific formatting is not an issue
+function getRatioRight(ratio,dx,dy)
+    if (dx/dy)!=ratio
+        if dx>(ratio*dy)
+            dy=dx/ratio
+        else
+            dx=dy*ratio
+        end
+    end
+    return dx,dy
+end
 
 plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
 threeBodyAnim=Animation(plotLoadPath,String[])
-for i=1:333:length(t) #this makes animation scale ~1 sec/year with other conditions
+global frameNum=1
+stop=length(t)
+if collisionBool==true
+    stop=length(t)-600
+end
+global listInd=0
+center=[0.,0.] #not actually the center but this won't get used right away and should be overwritten before needed so doesn't matter
+limList=[]
+global oscillatingCount=0
+global oscillating=false
+global ratio=1
+for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
     GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
     gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
-    limx,limy=getLims(pos./1.5e11,10) #convert to AU, 10 AU padding
+    limx,limy,center=getLims(pos./1.5e11,15) #convert to AU, 10 AU padding
+    oldCenter=copy(center)
+    dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
+    global listInd #in Julia scope it a for loop like this doesn't know about variables declared otuside the loop
+    global oscillating
+    global oscillatingCount
+    global ratio
+    #this massive block from here to line 365 is nonsense that mitigates the jumpiness of the camera motion, adapted from my fancier n-body script.
+    if listInd>2 #this block will hopefully prevent the camera from oscillating back and forth..? (for a 10 frames right now)
+        oldLimx,oldLimy=limList[listInd][1],limList[listInd][2] #one back
+        oldLimx2,oldLimy2=limList[listInd-1][1],limList[listInd-1][2] #two back
+        oldDx2,oldDy2=(oldLimx2[2]-oldLimx2[1]),(oldLimy2[2]-oldLimy2[1])
+        oldDx,oldDy=(oldLimx[2]-oldLimx[1]),(oldLimy[2]-oldLimy[1])
+        if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.02#.05
+            dx=oldDx*1.02 #fix trajectory for a set amt of frames to prevent bounciness
+            dy=oldDy*1.02 #always opt for more space, but increase at slow rate
+            if dx>oldDx && oldDx2>oldDx
+                dx=oldDx*0.98
+                dy=oldDy*0.98
+            end
+            oscillating=true
+            oscillatingCount+=1
+            if oscillatingCount>30
+                oscillating=false
+                oscillatingCount=0
+            end
+        elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.02#.05
+            dx=oldDx*1.02
+            dy=oldDy*1.02
+            if dy>oldDy && oldDy2>oldDy
+                dx=oldDx*0.98
+                dy=oldDy*0.98
+            end
+            oscillating=true
+            oscillatingCount+=1
+            if oscillatingCount>30
+                oscillating=false
+                oscillatingCount=0
+            end
+        else
+            if oscillating==true
+                dx=oldDx*1.005#.01
+                dy=oldDy*1.005#.01
+                oscillatingCount+=1
+                if oscillatingCount>30 #1 sec at 30 FPS
+                    oscillating=false #don't want to freeze the frame forever...
+                    oscillatingCount=0
+                end
+            end
+        end
+    end
+    dx,dy=getRatioRight(ratio,dx,dy)
+    if listInd>1
+        oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
+        oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
+        if dx/oldDx<0.95 #frame shrunk more than 5%
+            limx[1]=oldCenter[1]-oldDx*0.95/2
+            limx[2]=oldCenter[1]+oldDx*0.95/2
+        elseif dx/oldDx>1.05 #grew more than 5%
+            limx[1]=oldCenter[1]-oldDx*1.05/2
+            limx[2]=oldCenter[1]+oldDx*1.05/2
+        elseif dy/oldDy<0.95
+            limy[1]=oldCenter[2]-oldDy*0.95/2
+            limy[2]=oldCenter[2]+oldDy*0.95/2
+        elseif dy/oldDy>1.05
+            limy[1]=oldCenter[2]-oldDy*1.05/2
+            limy[2]=oldCenter[2]+oldDy*1.05/2
+        end
+    end
+    listInd+=1
+    dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
+    dx,dy=getRatioRight(ratio,dx,dy)
+    limx[2]=limx[1]+dx
+    limy[2]=limy[1]+dy
+    push!(limList,[limx,limy])
     p=plot(plotData[1][1:33:i]./1.5e11,plotData[2][1:33:i]./1.5e11,label="",linecolor=colors[1],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
     p=plot!(plotData[3][1:33:i]./1.5e11,plotData[4][1:33:i]./1.5e11,label="",linecolor=colors[2],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
     p=plot!(plotData[5][1:33:i]./1.5e11,plotData[6][1:33:i]./1.5e11,label="",linecolor=colors[3],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
@@ -276,8 +378,38 @@ for i=1:333:length(t) #this makes animation scale ~1 sec/year with other conditi
     p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start",
         legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
         grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
-    frame(threeBodyAnim,p) #generate the frame
+    png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
+    global frameNum+=1
     closeall() #close plots
+end
+if collisionBool==true #this condition makes 2 seconds of slo-mo right before the collision
+    println("making collision cam")
+    for i=1:10:600
+        GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
+        gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
+        print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
+        pos=[plotData[1][end-(600-i)],plotData[2][end-(600-i)],plotData[3][end-(600-i)],plotData[4][end-(600-i)],plotData[5][end-(600-i)],plotData[6][end-(600-i)]] #current pos
+        limx,limy,center=getLims(pos./1.5e11,15) #convert to AU, 15 AU padding
+        p=plot(plotData[1][1:33:end-(600-i)]./1.5e11,plotData[2][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[1],linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #plot orbits up to i
+        p=plot!(plotData[3][1:33:end-(600-i)]./1.5e11,plotData[4][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[2],linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #linealpha argument causes lines to decay
+        p=plot!(plotData[5][1:33:end-(600-i)]./1.5e11,plotData[6][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[3],linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+        p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+        star1=makeCircleVals(rad[1],[plotData[1][end-(600-i)],plotData[2][end-(600-i)]]) #generate circles with appropriate sizes for each star
+        star2=makeCircleVals(rad[2],[plotData[3][end-(600-i)],plotData[4][end-(600-i)]]) #at current positions
+        star3=makeCircleVals(rad[3],[plotData[5][end-(600-i)],plotData[6][end-(600-i)]])
+        p=plot!(star1[1]./1.5e11,star1[2]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true) #plot star circles with labels
+        p=plot!(star2[1]./1.5e11,star2[2]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
+        p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
+        p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
+            background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
+        p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end-(600-i)]/365/24/3600)) years after start",
+            legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
+            grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
+        p=annotate!((limx[1]+(limx[2]-limx[1])/10,limy[2]-(limy[2]-limy[1])/10,Plots.text("COLLISION CAM (slo-mo x 33)",10,"Courier",:white,:left)))
+        png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
+        global frameNum+=1
+        closeall() #close plots
+    end
 end
 
 #threeBodyFile="3Body_fps30.mp4"
