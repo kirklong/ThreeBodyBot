@@ -1,8 +1,6 @@
 #!/usr/bin/env julia
 using Plots, Random, Printf
 
-global collisionBool=false #lazy way to keep track of whether we want to add "collision cam" at the end
-
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
     function getMass(nBodies) #generate random masses that better reflect actual stellar populations
         mList=zeros(nBodies)
@@ -101,12 +99,12 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
     min23=rad[2]+rad[3]
     i=1
     stopT=maximum(t)
-
+    collisionBool=false
     #implement RK4 to model solutions to differential equations
     while stop==false
         if currentT==stopT || currentT>stopT #in case of rounding error or something
             stop=true
-        elseif i>numSteps #inf loop failsafe
+        elseif i>(numSteps+1) #inf loop failsafe
             stop=true
             println("error: shouldn't have gotten here")
         else
@@ -130,9 +128,9 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
 
             if sep12<min12 || sep13<min13 || sep23<min23 || sep12>sepStop || sep13>sepStop || sep23>sepStop
                 if sep12<min12 || sep13<min13 || sep23<min23
-                    global collisionBool=true
+                    collisionBool=true
                 else
-                    global collisionBool=false
+                    collisionBool=false
                 end
                 stop=true #stop if collision happens or body is ejected
                 t=range(0,stop=currentT,length=i) #t should match pos vectors
@@ -147,7 +145,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             currentT+=stepSize #next step
         end
     end
-    return [x1,y1,x2,y2,x3,y3], t, m, rad
+    return [x1,y1,x2,y2,x3,y3], t, m, rad, collisionBool
 end
 
 function getInteresting3Body(minTime=0) #in years, defaults to 0
@@ -157,13 +155,13 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     interesting=false
     i=1
     while interesting==false
-        plotData,t,m,rad=gen3Body([50,150],500000)
+        plotData,t,m,rad,collisionBool=gen3Body([50,150],500000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
                 write(f,"$(maximum(t)/yearSec)\n")
             end
-            return plotData,t,m,rad
+            return plotData,t,m,rad,collisionBool
             interesting=true
         elseif i>1999 #computationally expensive so don't want to go forever
             interesting=true #render it anyways I guess because sometimes it's fun?
@@ -172,7 +170,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             open("cron_log.txt","a") do f #for cron logging
                 write(f,"found a solution with t = $(maximum(t)/yearSec) in $i iterations\n")
             end
-            return plotData,t,m,rad
+            return plotData,t,m,rad,collisionBool
         end
         i+=1
     end
@@ -243,7 +241,7 @@ function makeCircleVals(r,center=[0,0])
     return xVals,yVals
 end
 
-plotData,t,m,rad=getInteresting3Body(15)
+plotData,t,m,rad,collisionBool=getInteresting3Body(15)
 c=[:DodgerBlue,:Gold,:Tomato] #most massive to least massive, also roughly corresponds to temp
 colors=getColors(m,c)
 #adding fake stars
@@ -270,8 +268,8 @@ function getRatioRight(ratio,dx,dy)
     return dx,dy
 end
 
-plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
-threeBodyAnim=Animation(plotLoadPath,String[])
+#plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
+#threeBodyAnim=Animation(plotLoadPath,String[])
 global frameNum=1
 stop=length(t)
 if collisionBool==true
@@ -384,7 +382,7 @@ for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
 end
 if collisionBool==true #this condition makes 2 seconds of slo-mo right before the collision
     println("making collision cam")
-    for i=0:10:600
+    for i=1:10:600
         GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
         gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
         print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
