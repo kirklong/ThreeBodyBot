@@ -109,7 +109,7 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         minSep=rad[n1]+rad[n2] #no touching!
                         split1,split2=split(names[n1]),split(names[n2])
                         if split1[end]=="hole" || split2[end]=="hole"
-                            minSep*=10 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
+                            minSep*=2 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
                         elseif split1[end]=="hole" && split2[end]=="hole"
                             minSep*=100000 #two black holes are V SMOL
                         end
@@ -238,8 +238,8 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 if iter==1
                     mInit=m0
                 else
-                    #mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
-                    mInit=getMass(nBodies0) #IMF way
+                    mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
+                    #mInit=getMass(nBodies0) #IMF way
                 end
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
@@ -412,7 +412,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
-        if length(x) == 0
+        if length(x) <= 1
             println("all bodies ejected, stopping plotting")
             return 0
         end
@@ -466,18 +466,18 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         if i>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-            if dx/oldDx<0.95 #frame shrunk more than 5%
-                limx[1]=oldCenter[1]-oldDx*0.95/2
-                limx[2]=oldCenter[1]+oldDx*0.95/2
-            elseif dx/oldDx>1.05 #grew more than 5%
-                limx[1]=oldCenter[1]-oldDx*1.05/2
-                limx[2]=oldCenter[1]+oldDx*1.05/2
-            elseif dy/oldDy<0.95
-                limy[1]=oldCenter[2]-oldDy*0.95/2
-                limy[2]=oldCenter[2]+oldDy*0.95/2
-            elseif dy/oldDy>1.05
-                limy[1]=oldCenter[2]-oldDy*1.05/2
-                limy[2]=oldCenter[2]+oldDy*1.05/2
+            if dx/oldDx<0.98 #frame shrunk more than 2%
+                limx[1]=oldCenter[1]-oldDx*0.98/2
+                limx[2]=oldCenter[1]+oldDx*0.98/2
+            elseif dx/oldDx>1.02 #grew more than 2%
+                limx[1]=oldCenter[1]-oldDx*1.02/2
+                limx[2]=oldCenter[1]+oldDx*1.02/2
+            elseif dy/oldDy<0.98
+                limy[1]=oldCenter[2]-oldDy*0.98/2
+                limy[2]=oldCenter[2]+oldDy*0.98/2
+            elseif dy/oldDy>1.02
+                limy[1]=oldCenter[2]-oldDy*1.02/2
+                limy[2]=oldCenter[2]+oldDy*1.02/2
             end
         end
         listInd+=1
@@ -515,7 +515,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
-            grid=false,titlefont=font(18,"Courier"),legendfontsize=9,legendtitle="Mass (in solar masses)",legendtitlefontsize=10,top_margin=4mm) #add in axes/title/legend with formatting
+            grid=false,titlefont=font(18,"Courier"),legendfontsize=9,legendtitle="Mass (in solar masses)",legendtitlefontsize=10,top_margin=2mm,bottom_margin=2mm) #add in axes/title/legend with formatting
         plotNum+=1
         png(p,@sprintf("tmpPlots2/frame_%06d.png",plotNum))
         closeall() #close plots
@@ -581,6 +581,20 @@ open("juliaColors.txt","r") do f
 end
 
 colorBool=parse(Int,ARGS[2])
+function getUniqueColors(nBodies,validColors)
+    accept=false
+    while accept==false
+        global randInd=rand(1:length(validColors),nBodies) #global because julia scope and I'm too lazy to do this right
+        #println("I'm stuck here")
+        println("$(length(unique(randInd))), $(length(randInd))")
+        if length(unique(randInd))==length(randInd)
+            accept=true #make sure that all entries are unique so no colors are duplicated
+            break
+        end
+    end
+    colors=[validColors[i] for i in randInd]
+    return colors
+end
 if colorBool==1
     println("let's pick colors!")
     colors=[]
@@ -599,25 +613,11 @@ if colorBool==1
     end
 elseif colorBool==2 #a nice set of color presets I like
     colorChoices=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink",
-                    "orange","thistle","violet","yellowgreen","whitesmoke","rosybrown","peachpuff",
-                    "paleturqoise","orchid","orangered","limegreen","goldenrod","fuchsia","bisque"]
-    colors=colorChoices[1:nBodies]
+                    "orange","thistle","yellowgreen","rosybrown","peachpuff","darksalmon","deeppink",
+                    "paleturquoise","orchid","orangered","limegreen","goldenrod","fuchsia","lightsteelblue"]
+    colors=getUniqueColors(nBodies,colorChoices)
 else
     println("using randomly generated colors")
-    function getUniqueColors(nBodies,validColors)
-        accept=false
-        while accept==false
-            global randInd=rand(1:length(validColors),nBodies) #global because julia scope and I'm too lazy to do this right
-            #println("I'm stuck here")
-            println("$(length(unique(randInd))), $(length(randInd))")
-            if length(unique(randInd))==length(randInd)
-                accept=true #make sure that all entries are unique so no colors are duplicated
-                break
-            end
-        end
-        colors=[validColors[i] for i in randInd]
-        return colors
-    end
     colors=getUniqueColors(nBodies,validColors)
 end
 
@@ -633,8 +633,8 @@ if labelBool==1
         push!(mStart,parse(Float64,name))
     end
 else
-    #mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
-    mStart=getMass(nBodies) #IMF way, but boring so not used right now
+    mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
+    #mStart=getMass(nBodies) #IMF way, but boring so not used right now
     labels=["$(mStart[i])" for i=1:nBodies]
 end
 
@@ -642,7 +642,7 @@ names=copy(labels)
 nBodies0=copy(nBodies)
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.00005,stopCond=[50,500],minTime=40,posRange=[-35,35],vRange=[-7e3,7e3])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.00005,stopCond=[50,500],minTime=40,posRange=[-50,50],vRange=[-7e3,7e3])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
