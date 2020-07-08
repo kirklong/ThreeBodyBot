@@ -65,7 +65,7 @@ fi
 #7=first step/Interstellar
 #8=time/Inception
 #9=I need a ride/Expanse
-musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
+musicFile="/home/kirk/Documents/3Body/music/music_choice_13.m4a"
 videoFile="/home/kirk/Documents/3Body/nbody/named_fps30.mp4"
 combinedFile="named_fps30_wMusic.mp4"
 combinedAACOut="named_fps30_wMusicAAC.mp4"

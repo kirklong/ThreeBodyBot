@@ -230,7 +230,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
                 plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                if t>(stopT/5) || iter>999 #no computer melting
+                if t>(stopT/10) || iter>1999 #no computer melting
                     println("found a solution with a first step t = $t years in $iter iterations")
                     return plotInfo,newPhysInfo,nBodies,names,colors,t,rad,m
                     accept=true
@@ -392,10 +392,6 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
-        if length(x) == 0
-            println("all bodies ejected, stopping plotting")
-            return 0
-        end
         for n=1:nBodies
             if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
                 if ejectBan[n][1]==0 || ejectBan[n][2]>60 #let it be considered again after 60 frames
@@ -409,7 +405,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
-        if length(x) == 0
+        if length(x) <= 1
             println("all bodies ejected, stopping plotting")
             return 0
         end
@@ -463,18 +459,18 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         if i>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-            if dx/oldDx<0.95 #frame shrunk more than 5%
-                limx[1]=oldCenter[1]-oldDx*0.95/2
-                limx[2]=oldCenter[1]+oldDx*0.95/2
-            elseif dx/oldDx>1.05 #grew more than 5%
-                limx[1]=oldCenter[1]-oldDx*1.05/2
-                limx[2]=oldCenter[1]+oldDx*1.05/2
-            elseif dy/oldDy<0.95
-                limy[1]=oldCenter[2]-oldDy*0.95/2
-                limy[2]=oldCenter[2]+oldDy*0.95/2
-            elseif dy/oldDy>1.05
-                limy[1]=oldCenter[2]-oldDy*1.05/2
-                limy[2]=oldCenter[2]+oldDy*1.05/2
+            if dx/oldDx<0.98 #frame shrunk more than 5%
+                limx[1]=oldCenter[1]-oldDx*0.98/2
+                limx[2]=oldCenter[1]+oldDx*0.98/2
+            elseif dx/oldDx>1.02 #grew more than 5%
+                limx[1]=oldCenter[1]-oldDx*1.02/2
+                limx[2]=oldCenter[1]+oldDx*1.02/2
+            elseif dy/oldDy<0.98
+                limy[1]=oldCenter[2]-oldDy*0.98/2
+                limy[2]=oldCenter[2]+oldDy*0.98/2
+            elseif dy/oldDy>1.02
+                limy[1]=oldCenter[2]-oldDy*1.02/2
+                limy[2]=oldCenter[2]+oldDy*1.02/2
             end
         end
         listInd+=1
@@ -508,13 +504,13 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         currentT=t[i]/365/24/3600+tOffset
         titleString="Random $nBodies-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
         if landscape==1
-            titleString="Random $nBodies-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
+            titleString="Random Long-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
-            grid=false,titlefont=font(24,"Courier"),legendfontsize=11,legendtitle="Mass (in solar masses)",legendtitlefontsize=11,top_margin=4mm) #add in axes/title/legend with formatting
+            grid=false,titlefont=font(24,"Courier"),legendfontsize=11,legendtitle="Contestants ($nBodies remaining)",legendtitlefontsize=11,top_margin=4mm,bottom_margin=2mm) #add in axes/title/legend with formatting
         plotNum+=1
-        png(p,@sprintf("tmpPlots/frame_%06d.png",plotNum))
+        png(p,@sprintf("tmpPlots2/frame_%06d.png",plotNum))
         closeall() #close plots
         I+=skipRate
     end
@@ -621,7 +617,7 @@ nBodies0=copy(nBodies)
 m=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[60,500],minTime=50,posRange=[-50,50])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[80,500],minTime=79,posRange=[-50,50])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
