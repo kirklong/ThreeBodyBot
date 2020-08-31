@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
 using Plots, Random, Printf, Plots.PlotMeasures
-include("IMF.jl") #new way to make random masses more "realistic"?
+println("hello!!!!")
 function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random initial conditions for mass/radius, position, and velocity, option for user to specify acceptable vRange and posRange
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
@@ -33,6 +33,10 @@ function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random 
     end
     pos=genPos(nBodies,posList,rad,minPos,maxPos).*1.5e11 #convert to SI, m
     v=[]
+    #NOTE: if you want to specify the initial positions and/or velocities uncomment and fill in the sample lines below
+    #technically if you want to save a bit of computation time you should also comment out lines 34 & 35
+    #pos=[[pos1X,pos1Y],[pos2X,pos2Y],[pos3X,pos3Y],.....,[posNX,posNY]].*1.5e11 #fill this in if you want to specify the positions, units of AU from center
+    #v=[[v1X,v1Y],[v1X,v1Y],[v3X,v3Y],......,[vNX,vNY]].*1e3 #fill this in to specify initial velocities, units of km/s
     for n=1:nBodies
         push!(v,rand(minV:maxV,2)) #random x & y velocity between minV:maxV, km/s
     end
@@ -43,12 +47,6 @@ function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random 
     for n=1:nBodies
         push!(r,v[n]) #v is second half of r
     end
-    #NOTE: if you want to specify the initial positions and/or velocities uncomment and fill in the sample lines below
-    #technically if you want to save a bit of computation time you should also comment out lines 34 & 35
-    #pos=[[pos1X,pos1Y],[pos2X,pos2Y],[pos3X,pos3Y],.....,[posNX,posNY]].*1.5e11 #fill this in if you want to specify the positions, units of AU from center
-    #v=[[v1X,v1Y],[v1X,v1Y],[v3X,v3Y],......,[vNX,vNY]].*1e3 #fill this in to specify initial velocities, units of km/s
-    #v=[[6.639,1.804],[-1.807,-0.998],[5.966,-4.904]].*1e3
-    #pos=[[-4,-34],[-4,-3],[-33,32]].*1.5e11
     open("initCondAll.txt","w") do f #save initial conditions to file in folder where script is run
        for n=1:nBodies
            write(f,"body $n info: m = $(@sprintf("%.1f",(m[n]/2e30))) solar masses | v = ($(v[n][1]/1e3),$(v[n][2]/1e3)) km/s | starting position = ($(pos[n][1]/1.5e11),$(pos[n][2]/1.5e11)) AU from center\n")
@@ -56,7 +54,7 @@ function initCondGen(nBodies,m;vRange=[-7e3,7e3],posRange=[-35,35]) #get random 
     end
     open("initCond.txt","w") do f
         for n=1:nBodies
-            write(f,"m$n = $(@sprintf("%.1f",(m[n]/2e30)))\n")
+            write(f,"m$n = $(@sprintf("%.1f",(m[n]/2e30)))")
         end
     end
     return [r, rad, m]
@@ -111,12 +109,9 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         if split1[end]=="hole" || split2[end]=="hole"
                             minSep*=2 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
                         elseif split1[end]=="hole" && split2[end]=="hole"
-                            minSep*=100000 #two black holes are V SMOL
+                            minSep*=50000 #two black holes are V SMOL
                         end
                         if sep<minSep
-                            #println("collision between indices $n1 and $n2")
-                            #println("names before modification: $names")
-                            #println("masses before modification: $(m./2e30)")
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
                             sharedY=(y1+y2)/2
                             p1x,p1y=m[n1]*r[n1+nBodies][1],m[n1]*r[n1+nBodies][2] #get initial momenta from each body
@@ -137,7 +132,7 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                             elseif split2[end]=="hole"
                                 names[n2]=names[n2][1:(end-11)]
                             end
-                            newName=string("$(@sprintf("%.1f",(newMass/2e30))) black hole") #update name to reflect collision
+                            newName=string(names[n1]," & ",names[n2]," black hole") #update name to reflect collision
                             names[n1]=newName #update n1 index since this is the one we "keep"
                             deleteat!(names,n2) #get rid of n2 since we don't need it anymore
                             deleteat!(colors,n2) #ditto for n2 color
@@ -146,8 +141,6 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                             newRad=2*(6.6743015e-11)*newMass/(9e16) #schwarzschild radius -- might change because it's tiny on plots but whatever
                             rad[n1]=newRad #update radii list to reflect merger
                             deleteat!(rad,n2) #get rid of the other one
-                            #println("names after modification: $names")
-                            #println("masses after modification: $(m./2e30)")
                             return true,r,nBodies-1,names,colors,m,rad #now we have 1 less body so return updated info!
                         end
                     end
@@ -218,9 +211,9 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
     numTrials=0
     plotList=[]
     tOffsets=[0.0] #first offest should be zero years
+    namesList=[names] #first set of names is just original names
     colorsList=[colors] #first set of colors is just original colors
     physInfoList=[]
-    namesList=[]
     nBodiesList=[nBodies]
     nBodiesGlobal=nBodies
     while globalT<stopT && nBodies>1 #go until we reach given time or there's one giant black hole
@@ -228,44 +221,31 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
         function firstStep(nBodies0,m0,names0,colors0,stopT,globalT,stopCond2,dt) #try to find a first step that goes for a reasonable amount of time without immediate collisions
             accept=false
             iter=1
-            mLocal=copy(m0)
-            iMax=1999
-            global labelBool
-            if labelBool==1
-                iMax=0 #we set the mass in init cond
-            end
             while accept==false
                 if iter==1
                     mInit=m0
                 else
                     mInit=rand(1:1500,nBodies0)./10 #n random masses between 0.1 and 150 solar masses
-                    #mInit=getMass(nBodies0) #IMF way
                 end
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
-                newNames=["$(mInit[i])" for i=1:length(mInit)]
-                plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,newNames,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                #println("t for iteration $iter = $t")c
-                if t>(stopT/10) || iter>iMax #sometimes we set all the initial conditions so this is pointless but whatever
+                plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
+                if t>(stopT/5) || iter>999 #no computer melting
                     println("found a solution with a first step t = $t years in $iter iterations")
-                    open("cron_log.txt","a") do f #for cron logging, a flag = append
-                        write(f,"found a solution with first step t = $t after $iter iterations\n")
-                    end
-                    namesList=[newNames,names]
-                    return plotInfo,newPhysInfo,nBodies,namesList,colors,t,rad,m
+                    return plotInfo,newPhysInfo,nBodies,names,colors,t,rad,m
                     accept=true
                 else
                     iter+=1
-                    #mLocal=getMass(nBodies0) IMF way, not currently used because it's boring
                 end
             end
         end
         if numTrials==1
-            plotInfo,newPhysInfo,nBodiesGlobal,namesList,colors,t,rad,m=firstStep(copy(nBodies),copy(m),copy(names),copy(colors),stopT,globalT,stopCond[2],dt)
+            plotInfo,newPhysInfo,nBodiesGlobal,names,colors,t,rad,m=firstStep(copy(nBodies),copy(m),copy(names),copy(colors),stopT,globalT,stopCond[2],dt)
             globalT+=t
             println("number of output files at this step: $(ceil(t/dt)) | nBodies = $nBodiesGlobal")
             push!(tOffsets,globalT) #keep track of offsets for plotting later
             push!(plotList,plotInfo) #keep track of data from each step in master list
+            push!(namesList,names) #keep track of names at each step
             push!(colorsList,colors) #keep track of colors at each step
             push!(physInfoList,[rad,m]) #we don't need to save r because that happens in x & y -- THIS IS INITIAL RAD,M
             push!(physInfoList,[newPhysInfo[2],newPhysInfo[3]]) #THIS IS RAD, M AFTER FIRST STEP
@@ -290,7 +270,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
     return numTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList
 end
 
-function getInterestingNBody(nBodies,m,names,colors; minTime=0,stopCond=[10,100],dt=0.033,iMax=10,vRange=[-7e3,7e3],posRange=[-50,50]) #units of things in yrs, AU
+function getInterestingNBody(nBodies,m,names,colors; minTime=0,stopCond=[10,100],dt=0.033,iMax=10,vRange=[-7e3,7e3],posRange=[-35,35]) #units of things in yrs, AU
     #sometimes random conditions result in a really short animation where things
     #just crash into each other/fly away, so this function throws away those
     #comments above from threeBody code -- since I allow collisions now this pretty much always runs all the way through first try but good to have just in case
@@ -372,7 +352,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
     plotNum=offsets[2]
     I=0
     listInd=0
-    centerList=[] #not actually the center but this won't get used right away and should be overwritten before needed so doesn't matter
+    center=[0.,0.] #not actually the center but this won't get used right away and should be overwritten before needed so doesn't matter
     limList=[]
     oscillatingCount=0
     oscillating=false
@@ -392,20 +372,15 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             p=plot(size=(1920,1080)) #FHD landscape
         end
         if sectionNum>1  #don't need to do this forever since they decay to 0 anyways
-            for n=1:length(backData) #old list has +1 bodies #maybe change the condition here to just the limits from the last frame?? might fix problems
+            for n=1:length(backData) #old list has +1 bodies
                 p=plot!(backData[n][1]./1.5e11,backData[n][2]./1.5e11,label="",linecolor=oldColorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):oldI) .+ 10000 .- (oldI+i),1000)/10000)
             end
         end
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
         x=[]
         y=[]
-        if i>1
-            center=centerList[listInd]
-        else
-            center=[0.,0.]
-        end
         for n=1:nBodies
-            if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) || abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
+            if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
                 if ejectBan[n][1]==0 || ejectBan[n][2]>60 #let it be considered again after 60 frames
                     push!(x,xData[n][i]/1.5e11)
                     push!(y,yData[n][i]/1.5e11)
@@ -417,12 +392,29 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
-        if length(x) <= 1
+        if length(x) == 0
+            println("all bodies ejected, stopping plotting")
+            return 0
+        end
+        for n=1:nBodies
+            if abs(xData[n][i])/1.5e11 <= (maxFrame*1.25*ratio + abs(center[1])) && abs(yData[n][i])/1.5e11 <= (maxFrame*1.25 + abs(center[2]))
+                if ejectBan[n][1]==0 || ejectBan[n][2]>60 #let it be considered again after 60 frames
+                    push!(x,xData[n][i]/1.5e11)
+                    push!(y,yData[n][i]/1.5e11)
+                    ejectBan[n][1]=0
+                    ejectBan[n][2]=0
+                end
+            else
+                ejectBan[n][1]=1
+                ejectBan[n][2]+=1 #it's stayed ejected another frame
+            end
+        end
+        if length(x) == 0
             println("all bodies ejected, stopping plotting")
             return 0
         end
         oldCenter=copy(center)
-        limx,limy,center=getLims(x,y,15,maxFrame,oldCenter,landscape) #20 AU padding
+        limx,limy,center=getLims(x,y,20,maxFrame,oldCenter,landscape) #20 AU padding
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
         if listInd>2 #this block will hopefully prevent the camera from oscillating back and forth..? (for a 10 frames right now)
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2] #one back
@@ -430,12 +422,11 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             oldDx2,oldDy2=(oldLimx2[2]-oldLimx2[1]),(oldLimy2[2]-oldLimy2[1])
             oldDx,oldDy=(oldLimx[2]-oldLimx[1]),(oldLimy[2]-oldLimy[1])
             if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.03#.05
+                dx=oldDx*1.03 #fix trajectory for a set amt of frames to prevent bounciness
+                dy=oldDy*1.03 #always opt for more space, but increase at slow rate
                 if dx>oldDx && oldDx2>oldDx
                     dx=oldDx*0.97
                     dy=oldDy*0.97
-                else
-                    dx=oldDx*1.03 #fix trajectory for a set amt of frames to prevent bounciness
-                    dy=oldDy*1.03 #always opt for more space, but increase at slow rate
                 end
                 oscillating=true
                 oscillatingCount+=1
@@ -444,12 +435,11 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                     oscillatingCount=0
                 end
             elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.03#.05
+                dx=oldDx*1.03
+                dy=oldDy*1.03
                 if dy>oldDy && oldDy2>oldDy
                     dx=oldDx*0.97
                     dy=oldDy*0.97
-                else
-                    dx=oldDx*1.03
-                    dy=oldDy*1.03
                 end
                 oscillating=true
                 oscillatingCount+=1
@@ -470,40 +460,6 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             end
         end
         dx,dy=getRatioRight(ratio,dx,dy)
-        # if listInd>1
-        #     oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
-        #     oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-        #     # dCx=center[1]-centerList[listInd][1]
-        #     # dCy=center[2]-centerList[listInd][2]
-        #     # if abs(dCx)>2 #shifted more than 2 AU in x direction
-        #     #     newCx=centerList[listInd][1]+2*sign(center[1])
-        #     #     center[1]=newCx
-        #     # elseif abs(dCy)>2 #shifted more than 2 AU in y direction
-        #     #     newCy=centerList[listInd][1]+2*sign(center[2])
-        #     #     center[2]=newCy
-        #     # end
-        #     if dx/oldDx<0.97 #frame shrunk more than 2%
-        #         limx[1]=centerList[listInd][1]-oldDx*0.97/2
-        #         limx[2]=centerList[listInd][1]+oldDx*0.97/2
-        #         newCenter=centerList[listInd].-center./20
-        #         center=newCenter
-        #     elseif dx/oldDx>1.03 #grew more than 2%
-        #         limx[1]=centerList[listInd][1]-oldDx*1.03/2
-        #         limx[2]=centerList[listInd][1]+oldDx*1.03/2
-        #         newCenter=centerList[listInd].-center./20
-        #         center=newCenter
-        #     elseif dy/oldDy<0.97
-        #         limy[1]=centerList[listInd][2]-oldDy*0.97/2
-        #         limy[2]=centerList[listInd][2]+oldDy*0.97/2
-        #         newCenter=centerList[listInd].-center./20
-        #         center=newCenter
-        #     elseif dy/oldDy>1.03
-        #         limy[1]=centerList[listInd][2]-oldDy*1.03/2
-        #         limy[2]=centerList[listInd][2]+oldDy*1.03/2
-        #         newCenter=centerList[listInd].-center./20
-        #         center=newCenter
-        #     end
-        # end
         if i>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
@@ -522,7 +478,6 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             end
         end
         listInd+=1
-        push!(centerList,center)
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
         dx,dy=getRatioRight(ratio,dx,dy)
         limx[2]=limx[1]+dx
@@ -543,7 +498,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 fillColor=colorSymbols[n]
             end
             circleX,circleY=makeCircleVals(currentRad,[xData[n][i],yData[n][i]])
-            if xData[n][i]/1.5e11 > limx[2] || yData[n][i]/1.5e11 > limy[2] || xData[n][i]/1.5e11 < limx[1] || yData[n][i]/1.5e11 < limy[1] #it's out of the frame
+            if xData[n][i]/1.5e11 > limx[2]*1.25 || yData[n][i]/1.5e11 > limy[2]*1.25 || xData[n][i]/1.5e11 < limx[1]*1.25 || yData[n][i]/1.5e11 < limy[1]*1.25 #it's out of the frame
                 plotLabel=string(plotLabel," (ejected)")
             end
             p=plot!(circleX./1.5e11,circleY./1.5e11,label=plotLabel,linecolor=colorSymbols[n],fill=true,fillcolor=fillColor)
@@ -551,15 +506,15 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
             background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
         currentT=t[i]/365/24/3600+tOffset
-        titleString="Random $nBodies-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
+        titleString="Random Long-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
         if landscape==1
-            titleString="Random $nBodies-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
+            titleString="Random Long-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
-            grid=false,titlefont=font(18,"Courier"),legendfontsize=9,legendtitle="Mass (in solar masses)",legendtitlefontsize=10,top_margin=2mm,bottom_margin=2mm) #add in axes/title/legend with formatting
+            grid=false,titlefont=font(24,"Courier"),legendfontsize=11,legendtitle="Contestants ($nBodies remaining)",legendtitlefontsize=11,top_margin=4mm) #add in axes/title/legend with formatting
         plotNum+=1
-        png(p,@sprintf("tmpPlots2/frame_%06d.png",plotNum))
+        png(p,@sprintf("tmpPlots/frame_%06d.png",plotNum))
         closeall() #close plots
         I+=skipRate
     end
@@ -595,7 +550,6 @@ function plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsLis
         currentPlotData=plotList[i]
         currentPhysInfo=physInfoList[i]
         currentNames=namesList[i]
-        #println("names at step $i = $currentNames")
         currentColors=colorsList[i]
         if i>1
             oldColors=colorsList[1]
@@ -623,20 +577,6 @@ open("juliaColors.txt","r") do f
 end
 
 colorBool=parse(Int,ARGS[2])
-function getUniqueColors(nBodies,validColors)
-    accept=false
-    while accept==false
-        global randInd=rand(1:length(validColors),nBodies) #global because julia scope and I'm too lazy to do this right
-        #println("I'm stuck here")
-        #println("$(length(unique(randInd))), $(length(randInd))")
-        if length(unique(randInd))==length(randInd)
-            accept=true #make sure that all entries are unique so no colors are duplicated
-            break
-        end
-    end
-    colors=[validColors[i] for i in randInd]
-    return colors
-end
 if colorBool==1
     println("let's pick colors!")
     colors=[]
@@ -653,38 +593,35 @@ if colorBool==1
             end
         end
     end
-elseif colorBool==2 #a nice set of color presets I like
-    colorChoices=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink",
-                    "orange","thistle","yellowgreen","rosybrown","peachpuff","darksalmon","deeppink",
-                    "paleturquoise","orchid","orangered","limegreen","goldenrod","fuchsia","lightsteelblue"]
-    colors=getUniqueColors(nBodies,colorChoices)
+elseif colorBool==2 #a nice set of color presets I like for 7 bodies
+    colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink"]
 else
     println("using randomly generated colors")
-    colors=getUniqueColors(nBodies,validColors)
+    randInd=rand(1:length(validColors),nBodies)
+    colors=[validColors[i] for i in randInd]
 end
 
 labelBool=parse(Int,ARGS[3])
 if labelBool==1
-    println("let's make some stars!")
+    println("let's name our stars!")
     labels=[]
-    mStart=[]
     for n=1:nBodies
-        print("please enter a mass (solar mass units) for body $n/$nBodies: ")
+        print("please enter a name for body $n: ")
         name=readline()
         push!(labels,name)
-        push!(mStart,parse(Float64,name))
     end
+elseif labelBool==2
+    labels=["Joe","Liza","Amy","Richard","Ted","Dave","Morgan"]
 else
-    mStart=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
-    #mStart=getMass(nBodies) #IMF way, but boring so not used right now
-    labels=["$(mStart[i])" for i=1:nBodies]
+    labels=["$i" for i=1:nBodies]
 end
 
 names=copy(labels)
 nBodies0=copy(nBodies)
+m=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
 
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,copy(mStart),names,colors,dt=0.00005,stopCond=[50,500],minTime=40,posRange=[-60,60],vRange=[-10e3,10e3])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[60,500],minTime=50,posRange=[-50,50])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
@@ -739,4 +676,4 @@ for i=1:numStars
 end
 landscape=parse(Int,ARGS[4])
 #STEP 3: plot data with parameters (note that dt and maxFrame must be duplicated as is, should probably have user pass them in and store to var)
-plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsList,100,tOffsets,0.00005,slowDown=1)
+plotAll(landscape,nBodiesList,plotList,physInfoList,namesList,colorsList,100,tOffsets,0.0001,slowDown=1)

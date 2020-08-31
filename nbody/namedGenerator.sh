@@ -11,9 +11,10 @@ if [ -f $oldAnim ] ; then
     rm named*.mp4 #not strictly necessary, but removing prevents tweeting out old animation if there is an error
     #remove all mp4 videos, not just oldAnim (with adding music others are created)
 fi
-./namedBody.jl 7 2 2 1 2>"juliaErr.log"
+./namedBodySTABLE.jl 7 2 2 1 2>"juliaErr.log"
 echo 'frames generated, running ffmpeg' >> /home/kirk/Documents/3Body/nbody/cron_log.txt
-cd tmpPlots2
+cd tmpPlots
+#cd tmpPlots2
 ffmpeg -framerate 30 -i "frame_%06d.png" -c:v libx265 -preset slow -coder 1 -movflags +faststart -g 15 -crf 20 -pix_fmt yuv420p -y -bf 2 -vf "scale=1920:1080" "/home/kirk/Documents/3Body/nbody/named_fps30.mp4"
 echo 'animation generated, removing png files' >> /home/kirk/Documents/3Body/nbody/cron_log.txt
 rm *.png
