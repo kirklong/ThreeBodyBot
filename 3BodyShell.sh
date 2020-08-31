@@ -18,9 +18,9 @@ LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
 nBody=$((1+RANDOM%7)) #1 and 7 chance of doing nBody simulation
 if [ $nBody -eq 1 ]; then
   echo 'n-body simulation!' >> /home/kirk/Documents/3Body/cron_log.txt
-  nBodies=$((4+RANDOM%16)) #20 is a lot, and I think close to the limit of what fits in tweet
+  nBodies=$((4+RANDOM%6)) #20 is a lot, and I think close to the limit of what fits in tweet
   cd nbody
-  ./requests.jl $nBodies 0 0 0  > $LOGFILE 2>&1
+  ./requests.jl $nBodies 2 0 0  > $LOGFILE 2>&1
   mv initCond.txt ../
   cd ..
   echo "*** Special ${nBodies}-Body Problem ***"$'\n'"$(cat initCond.txt)" > initCond.txt
@@ -99,5 +99,5 @@ combinedAACOut="3Body_fps30_wMusicAAC.mp4"
 ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine audio w/video
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
 cd twitterbot
-#./server.js
+./server.js
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt
