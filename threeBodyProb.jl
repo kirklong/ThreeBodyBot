@@ -188,6 +188,8 @@ transitionPoint=false
 extraX=[0.,0.]
 extraY=[0.,0.]
 orbitingList=[0]
+cOffsetX=0
+cOffsetY=0
 function getLims(pos,padding,m) #determines plot limits at each frame, padding in units of pos
     x=[pos[1],pos[3],pos[5]]
     xMin=minimum(x)
@@ -200,11 +202,17 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
     d1_2=sqrt((x[1]-x[2])^2 + (y[1]-y[2])^2)
     d1_3=sqrt((x[1]-x[3])^2 + (y[1]-y[3])^2)
     d2_3=sqrt((x[2]-x[3])^2 + (y[2]-y[3])^2)
+    #cmAllX=sum(m.*x)/(sum(m)) #center of mass of entire system
+    #cmAllY=sum(m.*y)/(sum(m)) #same but in y
+    cAllX=sum(x)/3 #this is the center in the x direction
+    cAllY=sum(y)/3 #center in y direction
     orbiting=false
     global transitionPoint #note that all these globals are really bad/lazy programming practice but whatever
     global extraX
     global extraY
     global orbitingList
+    global cOffsetX
+    global cOffsetY
     function setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew) #set global variables to try to smooth out transition points
         global transitionPoint
         global extraX
@@ -221,9 +229,6 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
             elseif yMin!=minimum(yNew)
                 extraY=[yMin-cmY,0] #same as above but negative in this case, extra spacing down
             end
-        else
-            extraX=[0.,0.]
-            extraY=[0.,0.]
         end
     end
     if d1_2/d2_3 > 2 && d1_3/d2_3 > 2 #objects 2 and 3 are orbiting?
@@ -256,20 +261,28 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
         yMax=maximum(yNew)+extraY[2] #new yMax
         dy=yMax-yMin
         push!(orbitingList,1)
+        cAllX=sum(xNew)/2
+        cAllY=sum(yNew)/2
+        if transitionPoint==true && orbitingList[end-1]==0 #only set offsets if last frame wasn't in oribiting mode
+            global cOffsetX=sum(x)/3-cAllX #how different are the two center calculations?
+            global cOffsetY=sum(y)/3-cAllY #also keep track of what the center of mass center was at this point
+        end
     elseif orbiting==false
         if orbitingList[end]==1 #last frame was orbiting
             transitionPoint=false
+            global cOffsetX=0 #reset offsets
+            global cOffsetY=0
         end
         push!(orbitingList,0)
     end
     if dx>dy
         #use x for square
-        xlims=[xMin-padding,xMax+padding]
-        ylims=[yMin-padding,yMin+dx+padding]
+        xlims=[(cAllX+cOffsetX)-padding-dx/2,(cAllX+cOffsetX)+padding+dx/2]
+        ylims=[(cAllY+cOffsetY)-padding-dx/2,(cAllY+cOffsetY)+padding+dx/2]
     else
         #use y for square
-        xlims=[xMin-padding,xMin+dy+padding]
-        ylims=[yMin-padding,yMax+padding]
+        xlims=[(cAllX+cOffsetX)-padding-dy/2,(cAllX+cOffsetX)+padding+dy/2]
+        ylims=[(cAllY+cOffsetY)-padding-dy/2,(cAllY+cOffsetY)+padding+dy/2]
     end
     return xlims,ylims,[sum(x)/3,sum(y)/3]
 end
