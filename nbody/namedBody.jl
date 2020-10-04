@@ -107,9 +107,9 @@ function checkSep(xList,yList,nBodies,i,m,r,rad,names,colors,maxSep) #this funct
                         minSep=rad[n1]+rad[n2] #no touching!
                         split1,split2=split(names[n1]),split(names[n2])
                         if split1[end]=="hole" || split2[end]=="hole"
-                            minSep*=10 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
+                            minSep*=2 #black holes are v smol so need to make the "hit box" bigger to prevent erroneous flying
                         elseif split1[end]=="hole" && split2[end]=="hole"
-                            minSep*=1000 #two black holes are V SMOL
+                            minSep*=50000 #two black holes are V SMOL
                         end
                         if sep<minSep
                             sharedX=(x1+x2)/2 #collision detected, so assign new coordinate values for resulting "black hole"
@@ -230,7 +230,7 @@ function genNBody(nBodies, m, names, colors; stopCond=[10,100],dt=0.033,vRange=[
                 physInfo0=initCondGen(nBodies0,mInit,vRange=vRange,posRange=posRange) #get initial conditions
                 rad,m=physInfo0[2],physInfo0[3] #r is the first thing but we don't need it here
                 plotInfo,newPhysInfo,nBodies,names,colors,t=genNBodyStep(nBodies0,physInfo0,names0,colors0,[stopT-globalT,stopCond2],dt) #generate one step -- ie until there is a collision
-                if t>(stopT/10) || iter>1999 #no computer melting
+                if t>(stopT/20) || iter>1999 #no computer melting
                     println("found a solution with a first step t = $t years in $iter iterations")
                     return plotInfo,newPhysInfo,nBodies,names,colors,t,rad,m
                     accept=true
@@ -353,6 +353,9 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
     I=0
     listInd=0
     center=[0.,0.] #not actually the center but this won't get used right away and should be overwritten before needed so doesn't matter
+    if sectionNum>1
+        center=backData[end] #starting center from last section
+    end
     limList=[]
     oscillatingCount=0
     oscillating=false
@@ -372,8 +375,8 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             p=plot(size=(1920,1080)) #FHD landscape
         end
         if sectionNum>1  #don't need to do this forever since they decay to 0 anyways
-            for n=1:length(backData) #old list has +1 bodies
-                p=plot!(backData[n][1]./1.5e11,backData[n][2]./1.5e11,label="",linecolor=oldColorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):oldI) .+ 10000 .- (oldI+i),1000)/10000)
+            for n=1:(length(backData)-1) #old list has +1 bodies, last entry contains center
+                p=plot!(backData[n][1]./1.5e11,backData[n][2]./1.5e11,label="",linewidth=2,linecolor=oldColorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):oldI) .+ 10000 .- (oldI+i),1000)/10000)
             end
         end
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
@@ -405,7 +408,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                 ejectBan[n][2]+=1 #it's stayed ejected another frame
             end
         end
-        if length(x) <= 1
+        if length(x) == 0
             println("all bodies ejected, stopping plotting")
             return 0
         end
@@ -418,11 +421,12 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             oldDx2,oldDy2=(oldLimx2[2]-oldLimx2[1]),(oldLimy2[2]-oldLimy2[1])
             oldDx,oldDy=(oldLimx[2]-oldLimx[1]),(oldLimy[2]-oldLimy[1])
             if dx>oldDx && oldDx2>oldDx || dx<oldDx && oldDx2<oldDx/1.02#.05
-                dx=oldDx*1.02 #fix trajectory for a set amt of frames to prevent bounciness
-                dy=oldDy*1.02 #always opt for more space, but increase at slow rate
                 if dx>oldDx && oldDx2>oldDx
                     dx=oldDx*0.98
                     dy=oldDy*0.98
+                else
+                    dx=oldDx*1.02 #fix trajectory for a set amt of frames to prevent bounciness
+                    dy=oldDy*1.02 #always opt for more space, but increase at slow rate
                 end
                 oscillating=true
                 oscillatingCount+=1
@@ -431,11 +435,12 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                     oscillatingCount=0
                 end
             elseif dy>oldDy && oldDy2>oldDy || dy<oldDy && oldDy2<oldDy/1.02#.05
-                dx=oldDx*1.02
-                dy=oldDy*1.02
                 if dy>oldDy && oldDy2>oldDy
                     dx=oldDx*0.98
                     dy=oldDy*0.98
+                else
+                    dx=oldDx*1.02
+                    dy=oldDy*1.02
                 end
                 oscillating=true
                 oscillatingCount+=1
@@ -459,19 +464,41 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         if i>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
+            #check frame expansion/shrinkage
             if dx/oldDx<0.98 #frame shrunk more than 5%
-                limx[1]=oldCenter[1]-oldDx*0.98/2
-                limx[2]=oldCenter[1]+oldDx*0.98/2
+                dx=oldDx*0.98
             elseif dx/oldDx>1.02 #grew more than 5%
-                limx[1]=oldCenter[1]-oldDx*1.02/2
-                limx[2]=oldCenter[1]+oldDx*1.02/2
+                dx=oldDx*1.02
             elseif dy/oldDy<0.98
-                limy[1]=oldCenter[2]-oldDy*0.98/2
-                limy[2]=oldCenter[2]+oldDy*0.98/2
+                dy=oldDy*0.98
             elseif dy/oldDy>1.02
-                limy[1]=oldCenter[2]-oldDy*1.02/2
-                limy[2]=oldCenter[2]+oldDy*1.02/2
+                dy=oldDy*1.02
             end
+            #check center shift
+            cXFraction=(center[1]-limx[1])/dx #percent distance from left edge
+            cYFraction=(center[2]-limy[1])/dx #percent distance up
+            oldCXFraction=(oldCenter[1]-oldLimx[1])/oldDx
+            oldCYFraction=(oldCenter[2]-oldLimy[1])/oldDy
+            if (cXFraction-oldCXFraction)>0.5 #shift to right max 1%
+                center[1]=oldCenter[1]+dx*0.01
+                did=true
+            elseif (cXFraction-oldCXFraction)<0.5 #shift to left max 1%
+                center[1]=oldCenter[1]-dx*0.01
+                did=true
+            elseif (cYFraction-oldCYFraction)>0.5 #shift up max 1%
+                center[2]=oldCenter[2]+dy*0.01
+                did=true
+            elseif (cYFraction-oldCYFraction)<0.5 #shift down max 1%
+                center[2]=oldCenter[2]-dy*0.01
+                did=true
+            end
+            if did==true
+                println("delta CX = $(cXFraction-oldCXFraction) | delta CY = $(cYFraction-oldCYFraction)")
+            end
+            limx[1]=center[1]-dx/2
+            limx[2]=center[1]+dx/2
+            limy[1]=center[2]-dy/2
+            limy[2]=center[2]+dy/2 #think this finally fixes glitch frames..?
         end
         listInd+=1
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
@@ -480,7 +507,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         limy[2]=limy[1]+dy
         push!(limList,[limx,limy])
         for n=1:nBodies
-            p=plot!(xData[n][1:Int(floor(skipRate/10)):i]./1.5e11,yData[n][1:Int(floor(skipRate/10)):i]./1.5e11,label="",linecolor=colorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):i) .+ 10000 .- i,1000)/10000)
+            p=plot!(xData[n][1:Int(floor(skipRate/10)):i]./1.5e11,yData[n][1:Int(floor(skipRate/10)):i]./1.5e11,label="",linewidth=2,linecolor=colorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):i) .+ 10000 .- i,1000)/10000)
         end
         p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
         for n=1:nBodies
@@ -504,7 +531,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         currentT=t[i]/365/24/3600+tOffset
         titleString="Random $nBodies-Body Problem\nt: $(@sprintf("%0.2f",currentT)) years after start"
         if landscape==1
-            titleString="Random Long-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
+            titleString="Random $nBodies-Body Problem  |  t: $(@sprintf("%0.2f",currentT)) years after start"
         end
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=titleString,
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(10,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(10,"Courier")),
@@ -520,6 +547,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
             yBack=yData[n][1:Int(floor(skipRate/10)):end]
             push!(backData,[xBack,yBack]) #initialize backData
         end
+        push!(backData,center) #return current center position for use in next section
     else
         for i=1:length(colors)
             currentColor=colors[i] #color is really a placeholder for which body this is
@@ -531,6 +559,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
                     backData[j][2]=vcat(backData[j][2],yBack) #stitch together new piece with old pieces (where applicable to surviving bodies)
                 end
             end
+            backData[end]=center #update old center
         end
     end
     return plotNum,backData,I
@@ -590,7 +619,7 @@ if colorBool==1
         end
     end
 elseif colorBool==2 #a nice set of color presets I like for 7 bodies
-    colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink"]
+    colors=["dodgerblue","blueviolet","lightseagreen","gold","crimson","silver","hotpink","orange"]
 else
     println("using randomly generated colors")
     randInd=rand(1:length(validColors),nBodies)
@@ -609,15 +638,14 @@ if labelBool==1
 elseif labelBool==2
     labels=["Joe","Liza","Amy","Richard","Ted","Dave","Morgan"]
 else
-    labels=["$i" for i=1:nBodies]
+    labels=["star $i" for i=1:nBodies]
 end
 
 names=copy(labels)
 nBodies0=copy(nBodies)
 m=rand(1:1500,nBodies)./10 #n random masses between 0.1 and 150 solar masses
-
 #STEP 2: generate the data with given parameters (may add dt, stopCond, posRange as user-input things later)
-nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[80,500],minTime=79,posRange=[-50,50])
+nTrials,plotList,tOffsets,physInfoList,namesList,colorsList,nBodiesList=getInterestingNBody(nBodies,m,names,colors,dt=0.0001,stopCond=[135,500],minTime=120,posRange=[-75,75],vRange=[-10e3,10e3])
 #nBodiesList=[nBodies0-i for i=0:(nTrials-1)] #function doesn't return a list
 
 #adding fake stars
