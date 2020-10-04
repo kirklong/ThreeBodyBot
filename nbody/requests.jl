@@ -393,7 +393,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         end
         if sectionNum>1  #don't need to do this forever since they decay to 0 anyways
             for n=1:length(backData) #old list has +1 bodies #maybe change the condition here to just the limits from the last frame?? might fix problems
-                p=plot!(backData[n][1]./1.5e11,backData[n][2]./1.5e11,label="",linecolor=oldColorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):oldI) .+ 10000 .- (oldI+i),1000)/10000)
+                p=plot!(backData[n][1]./1.5e11,backData[n][2]./1.5e11,label="",linewidth=2,linecolor=oldColorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):oldI) .+ 10000 .- (oldI+i),1000)/10000)
             end
         end
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
@@ -529,7 +529,7 @@ function plotSection(landscape,sectionNum,backData,oldI,oldColors,offsets,dt,nBo
         limy[2]=limy[1]+dy
         push!(limList,[limx,limy])
         for n=1:nBodies
-            p=plot!(xData[n][1:Int(floor(skipRate/10)):i]./1.5e11,yData[n][1:Int(floor(skipRate/10)):i]./1.5e11,label="",linecolor=colorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):i) .+ 10000 .- i,1000)/10000)
+            p=plot!(xData[n][1:Int(floor(skipRate/10)):i]./1.5e11,yData[n][1:Int(floor(skipRate/10)):i]./1.5e11,label="",linewidth=2,linecolor=colorSymbols[n],linealpha=max.((1:Int(floor(skipRate/10)):i) .+ 10000 .- i,1000)/10000)
         end
         p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
         for n=1:nBodies
