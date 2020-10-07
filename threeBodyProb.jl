@@ -274,6 +274,8 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
     elseif orbiting==0
         if orbitingList[end]!=0 #last frame was orbiting, so we need to transition back to using all three for center calc
             transitionPoint=false
+            global extraX = [0.,0.] #reset these
+            global extraY = [0.,0.]
             if orbitingList[end]==13 #1 and 3 orbiting, so old calc would use this cm
                 cmX=(m[1]*x[1]+m[3]*x[3])/(m[1]+m[3]) #get centers of mass
                 cmY=(m[1]*y[1]+m[3]*y[3])/(m[1]+m[3])
@@ -308,7 +310,7 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
         xlims=[(cAllX+cOffsetX)-padding-dy/2,(cAllX+cOffsetX)+padding+dy/2]
         ylims=[(cAllY+cOffsetY)-padding-dy/2,(cAllY+cOffsetY)+padding+dy/2]
     end
-    return xlims,ylims,[sum(x)/3,sum(y)/3]
+    return xlims,ylims,[cAllX+cOffsetX,cAllY+cOffSetY]
 end
 
 function getColors(m,c) #places colors of objects according to mass/size
@@ -399,7 +401,6 @@ for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
     limx,limy,center=getLims(pos./1.5e11,15,m) #convert to AU, 10 AU padding
-    oldCenter=copy(center)
     dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
     global listInd #in Julia scope it a for loop like this doesn't know about variables declared outside the loop
     global ratio
@@ -407,18 +408,18 @@ for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
     if listInd>1
         oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
         oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-        if dx/oldDx<0.97 #frame shrunk more than 5%
-            limx[1]=oldCenter[1]-oldDx*0.97/2
-            limx[2]=oldCenter[1]+oldDx*0.97/2
-        elseif dx/oldDx>1.03 #grew more than 5%
-            limx[1]=oldCenter[1]-oldDx*1.03/2
-            limx[2]=oldCenter[1]+oldDx*1.03/2
-        elseif dy/oldDy<0.97
-            limy[1]=oldCenter[2]-oldDy*0.97/2
-            limy[2]=oldCenter[2]+oldDy*0.97/2
+        if dx/oldDx<0.98 #frame shrunk more than 5%
+            limx[1]=center[1]-oldDx*0.98/2
+            limx[2]=center[1]+oldDx*0.98/2
+        elseif dx/oldDx>1.02 #grew more than 5%
+            limx[1]=center[1]-oldDx*1.02/2
+            limx[2]=center[1]+oldDx*1.02/2
+        elseif dy/oldDy<0.98
+            limy[1]=center[2]-oldDy*0.98/2
+            limy[2]=center[2]+oldDy*0.98/2
         elseif dy/oldDy>1.03
-            limy[1]=oldCenter[2]-oldDy*1.03/2
-            limy[2]=oldCenter[2]+oldDy*1.03/2
+            limy[1]=center[2]-oldDy*1.02/2
+            limy[2]=center[2]+oldDy*1.02/2
         end
     end
     listInd+=1
@@ -469,7 +470,7 @@ if collisionBool==true #this condition makes 2 seconds of slo-mo right before th
         p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end-(600-i)]/365/24/3600)) years after start",
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8,legendtitlefont="Courier") #add in axes/title/legend with formatting
-        p=annotate!((limx[1]+(limx[2]-limx[1])/20,limy[2]-(limy[2]-limy[1])/20,Plots.text("COLLISION CAM (slo-mo x 33)",12,"Courier",:orange,:left)))
+        p=annotate!((limx[1]+(limx[2]-limx[1])/40,limy[2]-(limy[2]-limy[1])/40,Plots.text("COLLISION CAM (slo-mo x 33)",10,"Courier",:orange,:left,:bold)))
         png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
         global frameNum+=1
         closeall() #close plots
