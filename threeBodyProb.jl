@@ -310,7 +310,7 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
         xlims=[(cAllX+cOffsetX)-padding-dy/2,(cAllX+cOffsetX)+padding+dy/2]
         ylims=[(cAllY+cOffsetY)-padding-dy/2,(cAllY+cOffsetY)+padding+dy/2]
     end
-    return xlims,ylims,[cAllX+cOffsetX,cAllY+cOffSetY]
+    return xlims,ylims,[cAllX+cOffsetX,cAllY+cOffsetY]
 end
 
 function getColors(m,c) #places colors of objects according to mass/size
