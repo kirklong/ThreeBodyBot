@@ -192,12 +192,12 @@ cOffsetX=0
 cOffsetY=0
 function getLims(pos,padding,m) #determines plot limits at each frame, padding in units of pos
     x=[pos[1],pos[3],pos[5]]
-    xMin=minimum(x)
-    xMax=maximum(x)
+    xMin=minimum(x)+extraX[1]
+    xMax=maximum(x)+extraX[2]
     dx=xMax-xMin
     y=[pos[2],pos[4],pos[6]]
-    yMin=minimum(y)
-    yMax=maximum(y)
+    yMin=minimum(y)+extraX[1]
+    yMax=maximum(y)+extraX[2]
     dy=yMax-yMin
     d1_2=sqrt((x[1]-x[2])^2 + (y[1]-y[2])^2)
     d1_3=sqrt((x[1]-x[3])^2 + (y[1]-y[3])^2)
@@ -206,13 +206,14 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
     #cmAllY=sum(m.*y)/(sum(m)) #same but in y
     cAllX=sum(x)/3 #this is the center in the x direction
     cAllY=sum(y)/3 #center in y direction
-    orbiting=false
+    orbiting=0
     global transitionPoint #note that all these globals are really bad/lazy programming practice but whatever
     global extraX
     global extraY
     global orbitingList
     global cOffsetX
     global cOffsetY
+
     function setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew) #set global variables to try to smooth out transition points
         global transitionPoint
         global extraX
@@ -220,7 +221,7 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
         if transitionPoint==false
             transitionPoint=true
             if xMax!=maximum(xNew)
-                extraX=[0,xMax-cmX] #the difference between new cm position and wherever frame was when transition happened
+                extraX=[0,xMax-cmX] #the difference between new cm position and wherever frame was when transition happened, cm will always be smaller
             elseif xMin!=minimum(xNew)
                 extraX=[xMin-cmX,0] #same as above but negative in this case, extra spacing to the left
             end
@@ -229,49 +230,72 @@ function getLims(pos,padding,m) #determines plot limits at each frame, padding i
             elseif yMin!=minimum(yNew)
                 extraY=[yMin-cmY,0] #same as above but negative in this case, extra spacing down
             end
+        # else
+        #     extraX=[0.,0.]
+        #     extraY=[0.,0.]
         end
     end
     if d1_2/d2_3 > 2 && d1_3/d2_3 > 2 #objects 2 and 3 are orbiting?
-        orbiting=true
+        orbiting=23
         cmX=(m[2]*x[2]+m[3]*x[3])/(m[2]+m[3]) #get centers of mass to use in limit calculations to prevent oscillations
         cmY=(m[2]*y[2]+m[3]*y[3])/(m[2]+m[3])
         xNew=[x[1],cmX]
         yNew=[y[1],cmY]
         setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
     elseif d2_3/d1_2 > 2 && d1_3/d1_2 > 2 #objects 2 and 1 are orbiting?
-        orbiting=true
+        orbiting=21
         cmX=(m[2]*x[2]+m[1]*x[1])/(m[2]+m[1]) #get centers of mass
         cmY=(m[2]*y[2]+m[1]*y[1])/(m[2]+m[1])
         xNew=[x[3],cmX]
         yNew=[y[3],cmY]
         setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
     elseif d1_2/d1_3 > 2 && d2_3/d1_3 > 2 #objects 1 and 3 are orbiting?
-        orbiting=true
+        orbiting=13
         cmX=(m[1]*x[1]+m[3]*x[3])/(m[1]+m[3]) #get centers of mass
         cmY=(m[1]*y[1]+m[3]*y[3])/(m[1]+m[3])
         xNew=[x[2],cmX]
         yNew=[y[2],cmY]
         setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
     end
-    if orbiting==true #repeat above calculation using CM coordinates
+    if orbiting!=0 #repeat above calculation using CM coordinates
         xMin=minimum(xNew)+extraX[1] #new xMin, including left shift to make transition "smooth"
         xMax=maximum(xNew)+extraX[2] #new xMax
         dx=xMax-xMin
         yMin=minimum(yNew)+extraY[1] #new yMin
         yMax=maximum(yNew)+extraY[2] #new yMax
         dy=yMax-yMin
-        push!(orbitingList,1)
+        push!(orbitingList,orbiting)
         cAllX=sum(xNew)/2
         cAllY=sum(yNew)/2
         if transitionPoint==true && orbitingList[end-1]==0 #only set offsets if last frame wasn't in oribiting mode
-            global cOffsetX=sum(x)/3-cAllX #how different are the two center calculations?
-            global cOffsetY=sum(y)/3-cAllY #also keep track of what the center of mass center was at this point
+            global cOffsetX+=sum(x)/3-cAllX #how different are the two center calculations?
+            global cOffsetY+=sum(y)/3-cAllY #also keep track of what the center of mass center was at this point
         end
-    elseif orbiting==false
-        if orbitingList[end]==1 #last frame was orbiting
+    elseif orbiting==0
+        if orbitingList[end]!=0 #last frame was orbiting, so we need to transition back to using all three for center calc
             transitionPoint=false
-            global cOffsetX=0 #reset offsets
-            global cOffsetY=0
+            if orbitingList[end]==13 #1 and 3 orbiting, so old calc would use this cm
+                cmX=(m[1]*x[1]+m[3]*x[3])/(m[1]+m[3]) #get centers of mass
+                cmY=(m[1]*y[1]+m[3]*y[3])/(m[1]+m[3])
+                xOld=[x[2],cmX]
+                yOld=[y[2],cmY]
+                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
+                global cOffsetY+=sum(yOld)/2-cAllY
+            elseif orbitingList[end]==21 #2 and 1 were orbiting
+                cmX=(m[2]*x[2]+m[1]*x[1])/(m[2]+m[1]) #get centers of mass
+                cmY=(m[2]*y[2]+m[1]*y[1])/(m[2]+m[1])
+                xOld=[x[3],cmX]
+                yOld=[y[3],cmY]
+                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
+                global cOffsetY+=sum(yOld)/2-cAllY
+            elseif orbitingList[end]==23
+                cmX=(m[2]*x[2]+m[3]*x[3])/(m[2]+m[3]) #get centers of mass to use in limit calculations to prevent oscillations
+                cmY=(m[2]*y[2]+m[3]*y[3])/(m[2]+m[3])
+                xOld=[x[1],cmX]
+                yOld=[y[1],cmY]
+                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
+                global cOffsetY+=sum(yOld)/2-cAllY
+            end
         end
         push!(orbitingList,0)
     end
