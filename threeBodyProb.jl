@@ -386,6 +386,9 @@ end
 
 #plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
 #threeBodyAnim=Animation(plotLoadPath,String[])
+
+##### beginning of fancy plot routine, requires compilation of frames manually via ffmpeg
+#comment all this stuff out and uncomment the old way (beneath this) if you want a "simpler" version/don't like/know how to use ffmpeg
 global frameNum=1
 stop=length(t)
 if collisionBool==true
@@ -493,7 +496,7 @@ end
 #     gr(legendfontcolor = plot_color(:white)) #plot arg broken right now in Julia
 #     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
 #     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
-#     limx,limy=getLims(pos./1.5e11,5) #convert to AU, 5 AU padding
+#     limx,limy,center=getLims(pos./1.5e11,5) #convert to AU, 5 AU padding
 #     plot(plotData[1][1:i]./1.5e11,plotData[2][1:i]./1.5e11,label="",linecolor=colors[1])
 #     plot!(plotData[3][1:i]./1.5e11,plotData[4][1:i]./1.5e11,label="",linecolor=colors[2])
 #     plot!(plotData[5][1:i]./1.5e11,plotData[6][1:i]./1.5e11,label="",linecolor=colors[3])
