@@ -274,7 +274,7 @@ function makeCircleVals(r,center=[0,0,0])
     return xVals,yVals,zVals
 end
 
-plotData,t,m,rad=getInteresting3Body(50)
+plotData,t,m,rad=getInteresting3Body(15)
 c=[:DodgerBlue,:Gold,:Tomato] #most massive to least massive, also roughly corresponds to temp
 colors=getColors(m,c)
 #adding fake stars
@@ -313,9 +313,9 @@ for i=1:333:length(t) #this makes animation scale ~1 sec/year with other conditi
     p=plot3d!(star3[1]./1.5e11,star3[2]./1.5e11,star3[3]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
     p=plot3d!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
         background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
-    p=plot3d!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start",
+    p=plot3d!(title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start",
         legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),zaxis=("z: AU",(limz[1],limz[2]),font(9,"Courier")),
-        grid=true,gridcolor=:white,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
+        gridalpha=0.5,gridcolor=:white,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
     frame(threeBodyAnim,p) #generate the frame
     closeall() #close plots
 end
