@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-using Plots, Random, Printf
+using Plots, Random, Printf, Plots.Measures
 
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
     function getMass(nBodies) #generate random masses that better reflect actual stellar populations
@@ -106,7 +106,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
     min23=rad[2]+rad[3]
     i=1
     stopT=maximum(t)
-
+    collisionBool=false
     #implement RK4 to model solutions to differential equations
     while stop==false
         if currentT==stopT || currentT>stopT #in case of rounding error or something
@@ -137,6 +137,11 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             sep23=sqrt((x3[i]-x2[i])^2+(y3[i]-y2[i])^2+(z3[i]-z2[i])^2)
 
             if sep12<min12 || sep13<min13 || sep23<min23 || sep12>sepStop || sep13>sepStop || sep23>sepStop
+                if sep12<min12 || sep13<min13 || sep23<min23
+                    collisionBool=true
+                else
+                    collisionBool=false
+                end
                 stop=true #stop if collision happens or body is ejected
                 t=range(0,stop=currentT,length=i) #t should match pos vectors
                 x1=x1[1:i] #don't want trailing zeros
@@ -153,7 +158,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             currentT+=stepSize #next step
         end
     end
-    return [x1,y1,z1,x2,y2,z2,x3,y3,z3], t, m, rad
+    return [x1,y1,z1,x2,y2,z2,x3,y3,z3], t, m, rad, collisionBool
 end
 
 function getInteresting3Body(minTime=0) #in years, defaults to 0
@@ -163,13 +168,13 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     interesting=false
     i=1
     while interesting==false
-        plotData,t,m,rad=gen3Body([60,150],600000)
+        plotData,t,m,rad,collisionBool=gen3Body([60,150],600000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
                 write(f,"$(maximum(t)/yearSec)\n")
             end
-            return plotData,t,m,rad
+            return plotData,t,m,rad,collisionBool
             interesting=true
         elseif i>5000 #computationally expensive so don't want to go forever
             interesting=true #render it anyways I guess because sometimes it's fun?
@@ -178,7 +183,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             open("cron_log.txt","a") do f #for cron logging
                 write(f,"$(maximum(t)/yearSec)\n")
             end
-            return plotData,t,m,rad
+            return plotData,t,m,rad,collisionBool
         end
         i+=1
     end
@@ -253,28 +258,15 @@ function getColors(m,c) #places colors of objects according to mass/size
     return colors
 end
 
-function makeCircleVals(r,center=[0,0,0])
-    #(x,y,z)=(rcos(theta)sin(phi),rsin(theta)sin(phi),rcos(phi))
+function makeCircleVals(r,center=[0,0])
     xOffset=center[1]
     yOffset=center[2]
-    zOffset=center[3]
-    xVals=[]
-    yVals=[]
-    zVals=[]
-    for i=0:pi/128:2*pi
-        for j=0:pi/64:pi
-            x=r*cos(i)*sin(j)+xOffset
-            y=r*sin(i)*sin(j)+yOffset
-            z=r*cos(j)+zOffset
-            push!(xVals,x)
-            push!(yVals,y)
-            push!(zVals,z)
-        end
-    end
-    return xVals,yVals,zVals
+    xVals=[r*cos(i)+xOffset for i=0:(pi/64):(2*pi)]
+    yVals=[r*sin(i)+yOffset for i=0:(pi/64):(2*pi)]
+    return xVals,yVals
 end
 
-plotData,t,m,rad=getInteresting3Body(15)
+plotData,t,m,rad,collisionBool=getInteresting3Body(15)
 c=[:DodgerBlue,:Gold,:Tomato] #most massive to least massive, also roughly corresponds to temp
 colors=getColors(m,c)
 #adding fake stars
@@ -288,71 +280,68 @@ for i=1:numStars
     starsY[i]=num[2]
     starsZ[i]=num[3]
 end
+stars = [starsX,starsY,starsZ]
+global frameNum=1
+stop=length(t)
+if collisionBool==true
+    stop=length(t)-600
+end
 
-#this new way runs significantly faster (~2x improvement over @anim)
-#Downside is it spams folder with png images of every frame and must manually compile with ffmpeg
-#Comment out and use older way (after this below) if performance/specific formatting is not an issue
+function makePanel(i1,i2,i,rad,plotData,stars,x,y,lims)
+    p=plot(plotData[i1][1:33:i]./1.5e11,plotData[i2][1:33:i]./1.5e11,label="",linewidth=2,linecolor=colors[1],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
+    p=plot!(plotData[i1+3][1:33:i]./1.5e11,plotData[i2+3][1:33:i]./1.5e11,label="",linewidth=2,linecolor=colors[2],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
+    p=plot!(plotData[i1+6][1:33:i]./1.5e11,plotData[i2+6][1:33:i]./1.5e11,label="",linewidth=2,linecolor=colors[3],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+    p=scatter!(stars[i1],stars[i2],markercolor=:white,markersize=:1,label="") #fake background stars
+    star1=makeCircleVals(rad[1],[plotData[i1][i],plotData[i2][i]]) #generate circles with appropriate sizes for each star
+    star2=makeCircleVals(rad[2],[plotData[i1+3][i],plotData[i2+3][i]]) #at current positions
+    star3=makeCircleVals(rad[3],[plotData[i1+6][i],plotData[i2+6][i]])
+    p=plot!(star1[1]./1.5e11,star1[2]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true) #plot star circles with labels
+    p=plot!(star2[1]./1.5e11,star2[2]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
+    p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
+    p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
+        background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,legendfontfamily="Courier") #formatting for plot frame
+    p=plot!(xlabel="$x: AU",ylabel="$y: AU",title="$x$y plane",
+        legend=:best,xaxis=("$x: AU",(lims[i1][1],lims[i1][2]),font(9,"Courier")),yaxis=("$y: AU",(lims[i2][1],lims[i2][2]),font(9,"Courier")),
+        grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8,legendtitlefont="Courier") #add in axes/title/legend with formatting
+    return p
+end
 
-plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
-threeBodyAnim=Animation(plotLoadPath,String[])
-for i=1:333:length(t) #this makes animation scale ~1 sec/year with other conditions
+for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
     GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
     gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i],plotData[7][i],plotData[8][i],plotData[9][i]] #current pos
-    limx,limy,limz=getLims(pos./1.5e11,10) #convert to AU, 10 AU padding
-    p=plot3d(plotData[1][1:33:i]./1.5e11,plotData[2][1:33:i]./1.5e11,plotData[3][1:33:i]./1.5e11,label="",linecolor=colors[1],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
-    p=plot3d!(plotData[4][1:33:i]./1.5e11,plotData[5][1:33:i]./1.5e11,plotData[6][1:33:i]./1.5e11,label="",linecolor=colors[2],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
-    p=plot3d!(plotData[7][1:33:i]./1.5e11,plotData[8][1:33:i]./1.5e11,plotData[9][1:33:i]./1.5e11,label="",linecolor=colors[3],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-    p=scatter3d!(starsX,starsY,starsZ,markercolor=:white,markersize=:1,label="") #fake background stars
-    star1=makeCircleVals(rad[1],[plotData[1][i],plotData[2][i],plotData[3][i]]) #generate spheres with appropriate sizes for each star
-    star2=makeCircleVals(rad[2],[plotData[4][i],plotData[5][i],plotData[6][i]]) #at current positions
-    star3=makeCircleVals(rad[3],[plotData[7][i],plotData[8][i],plotData[9][i]])
-    p=plot3d!(star1[1]./1.5e11,star1[2]./1.5e11,star1[3]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true) #plot star circles with labels
-    p=plot3d!(star2[1]./1.5e11,star2[2]./1.5e11,star2[3]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
-    p=plot3d!(star3[1]./1.5e11,star3[2]./1.5e11,star3[3]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
-    p=plot3d!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
-        background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
-    p=plot3d!(title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start",
-        legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),zaxis=("z: AU",(limz[1],limz[2]),font(9,"Courier")),
-        gridalpha=0.5,gridcolor=:white,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
-    frame(threeBodyAnim,p) #generate the frame
+    lims=getLims(pos./1.5e11,15) #convert to AU, 10 AU padding
+    pXY=makePanel(1,2,i,rad,plotData,stars,"x","y",lims)
+    pXZ=makePanel(1,3,i,rad,plotData,stars,"x","z",lims)
+    pYZ=makePanel(2,3,i,rad,plotData,stars,"y","z",lims)
+    title = plot(title = "Random Three-Body Problem: t = $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start", grid = false, showaxis = false,titlefontcolor=:black,titlefont=(font(18,"Courier")),
+    background_color=:white,foreground_color=:white,background_color_outside=:white,ticks=false,background_color_legend=:white,foreground_color_legend=:white,background_color_subplot=:white,background_color_inside=:white,foreground_color_subplot=:white)
+    P = plot(title,pXY,pXZ,pYZ,layout=@layout([A{0.05h}; [B C D]]),size=(720*3,720),left_margin=5mm,bottom_margin=5mm)
+    png(P,@sprintf("tmpPlots/frame_%06d.png",frameNum))
+    global frameNum+=1
     closeall() #close plots
 end
+if collisionBool==true #this condition makes 2 seconds of slo-mo right before the collision
+    println("making collision cam")
+    for i=1:10:600
+        GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
+        gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
+        print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
+        I = length(plotData[1])-(600-i)
+        pos=[plotData[1][end-(600-i)],plotData[2][end-(600-i)],plotData[3][end-(600-i)],plotData[4][end-(600-i)],plotData[5][end-(600-i)],plotData[6][end-(600-i)],plotData[7][end-(600-i)],plotData[8][end-(600-i)],plotData[9][end-(600-i)]] #current pos
+        lims=getLims(pos./1.5e11,15) #convert to AU, 15 AU padding
+        pXY=makePanel(1,2,I,rad,plotData,stars,"x","y",lims)
+        pXZ=makePanel(1,3,I,rad,plotData,stars,"x","z",lims)
+        pYZ=makePanel(2,3,I,rad,plotData,stars,"y","z",lims)#add in axes/title/legend with formatting
+        title = plot(title = "Random Three-Body Problem: t = $(@sprintf("%0.2f",t[i]/365/24/3600)) years after start", grid = false, showaxis = false,titlefontcolor=:black,titlefont=(font(18,"Courier")),
+        background_color=:white,foreground_color=:white,background_color_outside=:white,ticks=false,background_color_legend=:white,foreground_color_legend=:white,background_color_subplot=:white,background_color_inside=:white,foreground_color_subplot=:white)
+        P = plot(title,pXY,pXZ,pYZ,layout=@layout([A{0.05h}; [B C D]]),size=(720*3,720),left_margin=5mm,bottom_margin=5mm)
+        P=annotate!((lims[1][1]+(lims[1][2]-lims[1][1])/40,lims[2][2]-(lims[2][2]-lims[2][1])/40,Plots.text("COLLISION CAM (slo-mo x 33)",10,"Courier",:orange,:left,:bold)))
+        png(P,@sprintf("tmpPlots/frame_%06d.png",frameNum))
+        global frameNum+=1
+        closeall() #close plots
+    end
+end
 
-#threeBodyFile="3Body_fps30.mp4"
-
-#crf is compression value (17 or 18 "visually lossless"), pix_fmt is for twitter specific vid req, -b:v specifies target bitrate, -vcodec specifies codec (h264 in this case) -y says overwrite existing file
-#run( `ffmpeg -framerate 30 -i $plotLoadPath"%06d.png" -vcodec libx264 -pix_fmt yuv420p -profile:v high -b:v 2048K -y -vf "scale=720:720,setdar=1/1" $threeBodyFile` ) #-vf scale=720:72 -crf 25
-#run( `ffmpeg -framerate 30 -i $plotLoadPath"%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -vf "scale=720:720,setdar=1/1" $threeBodyFile` ) #all this bullshit to hopefully satisfy twitter requirements
-
-#NOTE: moved ffmpeg commands to shell script
-
-#old (simpler) way of generating animation
-#uncomment and use this way if you just want a simple animation saved and don't
-#care about performance/specific formatting of video.
-
-# threeBodyAnim=@animate for i=1:length(t)
-#     gr(legendfontcolor = plot_color(:white)) #plot arg broken right now in Julia
-#     print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
-#     pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
-#     limx,limy=getLims(pos./1.5e11,5) #convert to AU, 5 AU padding
-#     plot(plotData[1][1:i]./1.5e11,plotData[2][1:i]./1.5e11,label="",linecolor=colors[1])
-#     plot!(plotData[3][1:i]./1.5e11,plotData[4][1:i]./1.5e11,label="",linecolor=colors[2])
-#     plot!(plotData[5][1:i]./1.5e11,plotData[6][1:i]./1.5e11,label="",linecolor=colors[3])
-#     scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
-#     star1=makeCircleVals(rad[1],[plotData[1][i],plotData[2][i]])
-#     star2=makeCircleVals(rad[2],[plotData[3][i],plotData[4][i]])
-#     star3=makeCircleVals(rad[3],[plotData[5][i],plotData[6][i]])
-#     plot!(star1[1]./1.5e11,star1[2]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true)
-#     plot!(star2[1]./1.5e11,star2[2]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
-#     plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
-#     plot!(background_color=:black,background_color_legend=:transparent,background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #legendfontcolor=:white
-#     plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three Body Problem\nt: $(@sprintf("%0.2f",t[i]/365/24/3600)) yrs after start",
-#         legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(12,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(12,"Courier")),
-#         grid=false,titlefont=font(24,"Courier"),size=(720,720),legendfontsize=12,legendtitle="Mass (in solar masses)",legendtitlefontsize=14)
-#     end every 25
-
-#mp4(threeBodyAnim,"3Body_fps30.mp4",fps=30)
-#OR
-#gif(threeBodyAnim,"3Body_fps30.gif",fps=30)
+run(`ffmpeg -y -framerate 30 -i "tmpPlots/frame_%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 "/home/kirk/Documents/3Body/3Body3Frame_fps30.mp4"`)
