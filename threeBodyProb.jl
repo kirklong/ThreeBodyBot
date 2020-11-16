@@ -72,19 +72,21 @@ function dR(r,m;energyBool=0) #function we will use RK4 on to approximate soluti
     v1Y,v2Y,v3Y=r[8],r[10],r[12] #m after * dt
 
     #get change in velocity from accelerations (d^2r/dt^2*dt=dv/dt*dt=dv)
-    dx1=-(c2*(x1-x2)/(r1_2^3))-(c3*(x1-x3)/(r1_3^3)) #d^2x/dt^2 for 1, m/s after * dt
-    dx2=-(c1*(x2-x1)/(r1_2^3))-(c3*(x2-x3)/(r2_3^3)) #d^2x/dt^2 for 2, m/s
-    dx3=-(c1*(x3-x1)/(r1_3^3))-(c2*(x3-x2)/(r2_3^3)) #d^2x/dt^2 for 3, m/s
-    dy1=-(c2*(y1-y2)/(r1_2^3))-(c3*(y1-y3)/(r1_3^3)) #d^2y/dt^2 for 1, m/s
-    dy2=-(c1*(y2-y1)/(r1_2^3))-(c3*(y2-y3)/(r2_3^3)) #d^2y/dt^2 for 2, m/s
-    dy3=-(c1*(y3-y1)/(r1_3^3))-(c2*(y3-y2)/(r2_3^3)) #d^2y/dt^2 for 3, m/s
-    global energy
-    U=-G*M1*M2/r1_2-G*M2*M3/r2_3-G*M1*M3/r1_3
-    K=0.5*M1*(v1X^2+v1Y^2)+0.5*M2*(v2X^2+v2Y^2)+0.5*M3*(v3X^2+v3Y^2)
+    aX1=-(c2*(x1-x2)/(r1_2^3))-(c3*(x1-x3)/(r1_3^3)) #d^2x/dt^2 for 1, m/s after * dt
+    aX2=-(c1*(x2-x1)/(r1_2^3))-(c3*(x2-x3)/(r2_3^3)) #d^2x/dt^2 for 2, m/s
+    aX3=-(c1*(x3-x1)/(r1_3^3))-(c2*(x3-x2)/(r2_3^3)) #d^2x/dt^2 for 3, m/s
+    aY1=-(c2*(y1-y2)/(r1_2^3))-(c3*(y1-y3)/(r1_3^3)) #d^2y/dt^2 for 1, m/s
+    aY2=-(c1*(y2-y1)/(r1_2^3))-(c3*(y2-y3)/(r2_3^3)) #d^2y/dt^2 for 2, m/s
+    aY3=-(c1*(y3-y1)/(r1_3^3))-(c2*(y3-y2)/(r2_3^3)) #d^2y/dt^2 for 3, m/s
+
+    global energy #keep track of energy loss from RK4 error
+    U=-G*M1*M2/r1_2-G*M2*M3/r2_3-G*M1*M3/r1_3 #grav potential
+    K=0.5*M1*(v1X^2+v1Y^2)+0.5*M2*(v2X^2+v2Y^2)+0.5*M3*(v3X^2+v3Y^2) #kinetic
     if energyBool==1
         push!(energy,K+U) #total system energy
     end
-    return [v1X,v1Y,v2X,v2Y,v3X,v3Y,dx1,dy1,dx2,dy2,dx3,dy3]
+
+    return [v1X,v1Y,v2X,v2Y,v3X,v3Y,aX1,aY1,aX2,aY2,aX3,aY3]
 end
 
 function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 10 yrs and 100 AU sep
@@ -115,7 +117,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             stop=true
             println("error: shouldn't have gotten here")
         else
-            x1[i]=r[1]
+            x1[i]=r[1] #store current positions
             y1[i]=r[2]
             x2[i]=r[3]
             y2[i]=r[4]
@@ -126,7 +128,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             k2=stepSize*dR(r.+0.5.*k1,m)
             k3=stepSize*dR(r.+0.5.*k2,m)
             k4=stepSize*dR(r.+k3,m)
-            r+=(k1.+2.0*k2.+2.0.*k3.+k4)./6
+            r+=(k1.+2.0*k2.+2.0.*k3.+k4)./6 #RK4 update to positions, velocities
 
             #check separation after each dt step
             sep12=sqrt((x1[i]-x2[i])^2+(y1[i]-y2[i])^2)
