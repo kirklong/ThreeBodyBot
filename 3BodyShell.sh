@@ -15,7 +15,7 @@ if [ -f $oldAnim ] ; then
     #remove all mp4 videos, not just oldAnim (with adding music others are created)
 fi
 LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
-nBody=$((1+RANDOM%7)) #1 and 7 chance of doing nBody simulation
+nBody=$((1+RANDOM%10)) #1 and 7 chance of doing nBody simulation
 if [ $nBody -eq 1 ]; then
   echo 'n-body simulation!' >> /home/kirk/Documents/3Body/cron_log.txt
   nBodies=$((4+RANDOM%6)) #20 is a lot, and I think close to the limit of what fits in tweet
@@ -65,7 +65,7 @@ elif [ $num -eq 9 ]; then
 elif [ $num -eq 10 ]; then
   echo 'Music: Prelude in E Minor – Chopin' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 11 ]; then
-  echo 'Music: Prelude in C-Sharp Minor (Posthumous) – Chopin' >> /home/kirk/Documents/3Body/initCond.txt
+  echo 'Music: Nocturne in C-Sharp Minor (Posthumous) – Chopin' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 12 ]; then
   echo 'Music: Battlestar Sonatica (BSG) – McCreary' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 13 ]; then
@@ -99,5 +99,6 @@ combinedAACOut="3Body_fps30_wMusicAAC.mp4"
 ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine audio w/video
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
 cd twitterbot
-./server.js
+serverLog="/home/kirk/Documents/3Body/serverErr.log"
+./server.js > $serverLog 2>&1 #log any specific errors generated in tweeting script
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt
