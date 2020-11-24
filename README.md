@@ -119,7 +119,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   
   10. Prelude in E Minor – Chopin (recorded by me)
   
-  11. Prelude in C# Minor (Posthumous) – Chopin (recorded by me)
+  11. Nocturne in C# Minor (Posthumous) – Chopin (recorded by me)
   
   12. Battlestar Sonatica (from the Battlestar Galactica season 3 soundtrack) – McCreary (recorded by me)
   
