@@ -487,17 +487,6 @@ function main()
             dx=maxX-minX; dy=maxY-minY
             dF=dx<dy ? dy : dx #use dy for frame if dx smaller, else dx
 
-            p=plot!(title="COLLISION CAM\n(slo-mo x 33)",titlefontcolor=:orange,inset=(1,bbox(1/8,1/8,0.25,0.25)),
-                    xlims=(minX,minX+dF+1),ylims=(minY,minY+dF+1),legend=:false,left_margin=0mm,right_margin=0mm,top_margin=0mm,bottom_margin=0mm,
-                    foreground_color_border=:white,foreground_color_axis=:white,foreground_color_text=:white,grid=:false,
-                    aspect_ratio=:equal,fontfamily=:Courier,subplot=2,framestyle=:box,titlefontsize=10,tickfontsize=6)
-            p=plot!(p[2],plotData[1][1:10:end-(600-i)]./1.5e11,plotData[2][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
-            p=plot!(p[2],plotData[3][1:10:end-(600-i)]./1.5e11,plotData[4][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
-            p=plot!(p[2],plotData[5][1:10:end-(600-i)]./1.5e11,plotData[6][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
-            p=plot!(p[2],star1[1]./1.5e11,star1[2]./1.5e11,color=colors[1],fill=true)
-            p=plot!(p[2],star2[1]./1.5e11,star2[2]./1.5e11,color=colors[2],fill=true)
-            p=plot!(p[2],star3[1]./1.5e11,star3[2]./1.5e11,color=colors[3],fill=true)
-            p=scatter!(p[2],starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
             #draw zoom box
             cornersX=[minX,minX+dF+1]; cornersY=[minY,minY+dF+1]
             p=plot!([cornersX[1],cornersX[2]],[cornersY[1],cornersY[1]],c=:white,label="") #side 1
@@ -511,6 +500,18 @@ function main()
             p=plot!([subCornersX[2],cornersX[2]],[subCornersY[2],cornersY[2]],c=:white,label = "") #corner 2 -> corner 2
             p=plot!([subCornersX[1],cornersX[1]],[subCornersY[2],cornersY[2]],c=:white,label = "") #corner 3 -> corner 3
             p=plot!([subCornersX[2],cornersX[2]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 4 -> corner 4
+            #draw box before plot so plot labels are on top
+            p=plot!(title="COLLISION CAM\n(slo-mo x 33)",titlefontcolor=:orange,inset=(1,bbox(1/8,1/8,0.25,0.25)),
+                    xlims=(minX,minX+dF+1),ylims=(minY,minY+dF+1),legend=:false,left_margin=0mm,right_margin=0mm,top_margin=0mm,bottom_margin=0mm,
+                    foreground_color_border=:white,foreground_color_axis=:white,foreground_color_text=:white,grid=:false,
+                    aspect_ratio=:equal,fontfamily=:Courier,subplot=2,framestyle=:box,titlefontsize=10,tickfontsize=6)
+            p=plot!(p[2],plotData[1][1:10:end-(600-i)]./1.5e11,plotData[2][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
+            p=plot!(p[2],plotData[3][1:10:end-(600-i)]./1.5e11,plotData[4][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
+            p=plot!(p[2],plotData[5][1:10:end-(600-i)]./1.5e11,plotData[6][1:10:end-(600-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000)
+            p=plot!(p[2],star1[1]./1.5e11,star1[2]./1.5e11,color=colors[1],fill=true)
+            p=plot!(p[2],star2[1]./1.5e11,star2[2]./1.5e11,color=colors[2],fill=true)
+            p=plot!(p[2],star3[1]./1.5e11,star3[2]./1.5e11,color=colors[3],fill=true)
+            p=scatter!(p[2],starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
             #save frame
             png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
             frameNum+=1
