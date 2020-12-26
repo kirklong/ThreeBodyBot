@@ -523,7 +523,7 @@ function main()
             p=plot!([cornersX[2],cornersX[2]],[cornersY[1],cornersY[2]],c=:white,label="") #side 2
             p=plot!([cornersX[1],cornersX[2]],[cornersY[2],cornersY[2]],c=:white,label="") #side 3
             p=plot!([cornersX[1],cornersX[1]],[cornersY[1],cornersY[2]],c=:white,label="") #side 4
-            offset = 0.014 #for some reason the x corners don't quite match...
+            offset = 0.0145 #for some reason the x corners don't quite match...
             s1x,s1y = relative(p[1],1/8-offset,7/8-0.25); s2x,s2y = relative(p[1],1/8+0.25-offset,7/8)
             subCornersX=[s1x,s2x]; subCornersY=[s1y,s2y] #physical coordinates, box in top left
             p=plot!([subCornersX[1],cornersX[1]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 1 -> corner 1
@@ -581,7 +581,7 @@ function main()
             p=plot!([cornersX[2],cornersX[2]],[cornersY[1],cornersY[2]],c=:white,label="") #side 2
             p=plot!([cornersX[1],cornersX[2]],[cornersY[2],cornersY[2]],c=:white,label="") #side 3
             p=plot!([cornersX[1],cornersX[1]],[cornersY[1],cornersY[2]],c=:white,label="") #side 4
-            offset = 0.013 #for some reason the x corners don't quite match...
+            offset = 0.0145 #for some reason the x corners don't quite match...
             s1x,s1y = relative(p[1],1/8-offset,7/8-0.25); s2x,s2y = relative(p[1],1/8+0.25-offset,7/8)
             subCornersX=[s1x,s2x]; subCornersY=[s1y,s2y] #physical coordinates, box in top left
             p=plot!([subCornersX[1],cornersX[1]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 1 -> corner 1
