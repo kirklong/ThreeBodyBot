@@ -415,17 +415,17 @@ function main()
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
             if dx/oldDx<0.985 #frame shrunk more than 5%
-                limx[1]=center[1]-oldDx*0.98/2
-                limx[2]=center[1]+oldDx*0.98/2
+                limx[1]=center[1]-oldDx*0.985/2
+                limx[2]=center[1]+oldDx*0.985/2
             elseif dx/oldDx>1.015 #grew more than 5%
-                limx[1]=center[1]-oldDx*1.02/2
-                limx[2]=center[1]+oldDx*1.02/2
+                limx[1]=center[1]-oldDx*1.015/2
+                limx[2]=center[1]+oldDx*1.015/2
             elseif dy/oldDy<0.985
-                limy[1]=center[2]-oldDy*0.98/2
-                limy[2]=center[2]+oldDy*0.98/2
+                limy[1]=center[2]-oldDy*0.985/2
+                limy[2]=center[2]+oldDy*0.985/2
             elseif dy/oldDy>1.015
-                limy[1]=center[2]-oldDy*1.02/2
-                limy[2]=center[2]+oldDy*1.02/2
+                limy[1]=center[2]-oldDy*1.015/2
+                limy[2]=center[2]+oldDy*1.015/2
             end
         end
         listInd+=1
