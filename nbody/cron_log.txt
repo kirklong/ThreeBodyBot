@@ -3,3 +3,6 @@ starting script
 frames generated, running ffmpeg
 animation generated, removing png files
 adding music
+found a solution with first step t = 5.2890999999999995 after 1710 iterations
+found a solution with first step t = 34.82165 after 3 iterations
+50.0

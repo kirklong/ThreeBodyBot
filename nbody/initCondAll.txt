@@ -1,7 +1,6 @@
-body 1 info: m = 115.8 solar masses | v = (6.635,-2.501) km/s | starting position = (9.0,-12.0) AU from center
-body 2 info: m = 138.3 solar masses | v = (5.181,-3.662) km/s | starting position = (8.0,40.0) AU from center
-body 3 info: m = 147.0 solar masses | v = (2.527,0.228) km/s | starting position = (-22.0,-34.0) AU from center
-body 4 info: m = 40.3 solar masses | v = (-1.748,-3.873) km/s | starting position = (46.0,-41.0) AU from center
-body 5 info: m = 123.5 solar masses | v = (-0.188,-0.04) km/s | starting position = (32.0,40.0) AU from center
-body 6 info: m = 86.7 solar masses | v = (2.865,-4.003) km/s | starting position = (-40.0,11.0) AU from center
-body 7 info: m = 7.5 solar masses | v = (-1.51,3.07) km/s | starting position = (-6.0,33.0) AU from center
+body 1 info: m = 138.6 solar masses | v = (-0.654,4.813) km/s | starting position = (-3.0,-38.0) AU from center
+body 2 info: m = 60.3 solar masses | v = (-1.157,-5.749) km/s | starting position = (-33.0,-52.0) AU from center
+body 3 info: m = 46.3 solar masses | v = (-4.45,-2.12) km/s | starting position = (56.0,46.0) AU from center
+body 4 info: m = 29.4 solar masses | v = (-1.461,-8.544) km/s | starting position = (56.0,-40.0) AU from center
+body 5 info: m = 46.1 solar masses | v = (0.402,4.603) km/s | starting position = (45.0,8.0) AU from center
+body 6 info: m = 139.3 solar masses | v = (7.478,5.59) km/s | starting position = (-7.0,25.0) AU from center

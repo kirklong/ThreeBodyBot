@@ -326,7 +326,7 @@ function getColors(m,c) #places colors of objects according to mass/size
     #c=[:biggest,:medium,:smallest] (order of input colors)
     maxM=maximum(m)
     minM=minimum(m)
-    colors=[:blue,:blue,:blue] #testing
+    colors=[:DodgerBlue,:DodgerBlue,:DodgerBlue] #testing
     if m[1]==maxM
         colors[1]=c[1]
         if m[2]==minM
@@ -523,7 +523,7 @@ function main()
             p=plot!([cornersX[2],cornersX[2]],[cornersY[1],cornersY[2]],c=:white,label="") #side 2
             p=plot!([cornersX[1],cornersX[2]],[cornersY[2],cornersY[2]],c=:white,label="") #side 3
             p=plot!([cornersX[1],cornersX[1]],[cornersY[1],cornersY[2]],c=:white,label="") #side 4
-            offset = 0.014 #for some reason the x corners don't quite match...
+            offset = 0.0125 #for some reason the x corners don't quite match...
             s1x,s1y = relative(p[1],1/8-offset,7/8-0.25); s2x,s2y = relative(p[1],1/8+0.25-offset,7/8)
             subCornersX=[s1x,s2x]; subCornersY=[s1y,s2y] #physical coordinates, box in top left
             p=plot!([subCornersX[1],cornersX[1]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 1 -> corner 1
@@ -605,12 +605,10 @@ function makeAnim(clean=true)
     end
 end
 
-#generate frames!
 main()
-#generate the animation!
 #makeAnim() #commented out because I compile the frames in the shell script
 
-#old stuff....
+
 
 #threeBodyFile="3Body_fps30.mp4"
 
