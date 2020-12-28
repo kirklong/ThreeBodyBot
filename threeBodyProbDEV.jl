@@ -193,133 +193,294 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     end
 end
 
-transitionPoint=false
-extraX=[0.,0.]
-extraY=[0.,0.]
-orbitingList=[0]
-cOffsetX=0
-cOffsetY=0
-function getLims(pos,padding,m) #determines plot limits at each frame, padding in units of pos
-    x=[pos[1],pos[3],pos[5]]
-    xMin=minimum(x)+extraX[1]
-    xMax=maximum(x)+extraX[2]
-    dx=xMax-xMin
-    y=[pos[2],pos[4],pos[6]]
-    yMin=minimum(y)+extraX[1]
-    yMax=maximum(y)+extraX[2]
-    dy=yMax-yMin
-    d1_2=sqrt((x[1]-x[2])^2 + (y[1]-y[2])^2)
-    d1_3=sqrt((x[1]-x[3])^2 + (y[1]-y[3])^2)
-    d2_3=sqrt((x[2]-x[3])^2 + (y[2]-y[3])^2)
-    #cmAllX=sum(m.*x)/(sum(m)) #center of mass of entire system
-    #cmAllY=sum(m.*y)/(sum(m)) #same but in y
-    cAllX=sum(x)/3 #this is the center in the x direction
-    cAllY=sum(y)/3 #center in y direction
-    orbiting=0
-    global transitionPoint #note that all these globals are really bad/lazy programming practice but whatever
-    global extraX
-    global extraY
-    global orbitingList
-    global cOffsetX
-    global cOffsetY
-
-    function setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew) #set global variables to try to smooth out transition points
-        global transitionPoint
-        global extraX
-        global extraY
-        if transitionPoint==false
-            transitionPoint=true
-            if xMax!=maximum(xNew)
-                extraX=[0,xMax-cmX] #the difference between new cm position and wherever frame was when transition happened, cm will always be smaller
-            elseif xMin!=minimum(xNew)
-                extraX=[xMin-cmX,0] #same as above but negative in this case, extra spacing to the left
-            end
-            if yMax!=maximum(yNew)
-                extraY=[0,yMax-cmY] #the difference between new cm position and wherever frame was when transition happened
-            elseif yMin!=minimum(yNew)
-                extraY=[yMin-cmY,0] #same as above but negative in this case, extra spacing down
-            end
-        # else
-        #     extraX=[0.,0.]
-        #     extraY=[0.,0.]
-        end
-    end
+function detectOrbiting(d1_2,d1_3,d2_3,m,x,y)
     if d1_2/d2_3 > 2 && d1_3/d2_3 > 2 #objects 2 and 3 are orbiting?
         orbiting=23
         cmX=(m[2]*x[2]+m[3]*x[3])/(m[2]+m[3]) #get centers of mass to use in limit calculations to prevent oscillations
         cmY=(m[2]*y[2]+m[3]*y[3])/(m[2]+m[3])
         xNew=[x[1],cmX]
         yNew=[y[1],cmY]
-        setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
+        return orbiting,xNew,yNew
     elseif d2_3/d1_2 > 2 && d1_3/d1_2 > 2 #objects 2 and 1 are orbiting?
         orbiting=21
         cmX=(m[2]*x[2]+m[1]*x[1])/(m[2]+m[1]) #get centers of mass
         cmY=(m[2]*y[2]+m[1]*y[1])/(m[2]+m[1])
         xNew=[x[3],cmX]
         yNew=[y[3],cmY]
-        setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
+        return orbiting,xNew,yNew
     elseif d1_2/d1_3 > 2 && d2_3/d1_3 > 2 #objects 1 and 3 are orbiting?
         orbiting=13
         cmX=(m[1]*x[1]+m[3]*x[3])/(m[1]+m[3]) #get centers of mass
         cmY=(m[1]*y[1]+m[3]*y[3])/(m[1]+m[3])
         xNew=[x[2],cmX]
         yNew=[y[2],cmY]
-        setExtraSpacing(cmX,cmY,xMax,xMin,yMax,yMin,xNew,yNew)
+        return orbiting,xNew,yNew
+    else #no pairs orbiting
+        return 0,x,y
     end
-    if orbiting!=0 #repeat above calculation using CM coordinates
-        xMin=minimum(xNew)+extraX[1] #new xMin, including left shift to make transition "smooth"
-        xMax=maximum(xNew)+extraX[2] #new xMax
-        dx=xMax-xMin
-        yMin=minimum(yNew)+extraY[1] #new yMin
-        yMax=maximum(yNew)+extraY[2] #new yMax
-        dy=yMax-yMin
-        push!(orbitingList,orbiting)
-        cAllX=sum(xNew)/2
-        cAllY=sum(yNew)/2
-        if transitionPoint==true && orbitingList[end-1]==0 #only set offsets if last frame wasn't in oribiting mode
-            global cOffsetX+=sum(x)/3-cAllX #how different are the two center calculations?
-            global cOffsetY+=sum(y)/3-cAllY #also keep track of what the center of mass center was at this point
+end
+
+function getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    cX,cY=sum(xNew)/length(xNew),sum(yNew)/length(yNew) #next thing to change..?
+    dx=maximum(xNew)-minimum(xNew); dy=maximum(yNew)-minimum(yNew)
+    dF = dx<dy ? dy : dx
+    xlims=[(cX+ΔCx)-padding-dF/2-ΔL,(cX+ΔCx)+padding+dF/2+ΔR]
+    ylims=[(cY+ΔCy)-padding-dF/2-ΔD,(cY+ΔCy)+padding+dF/2+ΔU]
+    return xlims,ylims
+end
+
+function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=100000)
+    targCx,targCy,targxlims,targylims = target #these are the "old" limits we want offset to
+    cx,cy = start
+    ΔCx,ΔCy = cx-targCx,cy-targCy
+    diffxList = [0.,0.,0.]; diffyList = [0.,0.,0.]
+    xtargList = [0.,0.,0.]; ytargList = [0.,0.,0.]
+    ΔL = ΔR = extraDx/2; ΔU = ΔD = extraDy/2
+    xlims,ylims = getLims(x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    diff(r,rTarg)=abs(r-rTarg)
+    for i = 1:length(pos)
+        Bx,By = pos[i]
+        rx,ry = relative(xlims,ylims,Bx,By)
+        rxTarg,ryTarg = relative(targxlims,targylims,Bx,By)
+        xtargList[i] = rxTarg; ytargList[i] = ryTarg
+        diffxList[i] = diff(rx,rxTarg); diffyList[i] = diff(ry,ryTarg)
+    end
+    diffx,xInd = findmax(diffxList); diffy,yInd = findmax(diffyList)
+    Bx = pos[xInd][1]; By = pos[yInd][2]
+    rxTarg = xtargList[xInd]; ryTarg = ytargList[yInd]
+    if diffx<tol && diffy<tol #less than 1% diff between calc
+        return xlims,ylims,ΔCx,ΔCy
+    else
+        dx = targxlims[2]-targxlims[1]; dy = targylims[2]-targylims[1]
+        function getDir(targxlims,targylims,ΔCx,ΔCy,tol,dx,dy)
+            acceptXDir = false; acceptYDir = false
+            signdx = diffx<tol ? 0 : -1; signdy = diffy<tol ? 0 : -1
+            counter = 1
+            println("\nfinding sign directions for center shifts\n")
+            while acceptXDir == false || acceptYDir == false
+                if acceptXDir == false
+                    signdx=signdx^counter
+                end
+                if acceptYDir == false
+                    signdy=signdy^counter
+                end
+                guessX = ΔCx+signdx*dx*tol/10; guessY = ΔCy+signdy*dy*tol/10
+                xlims,ylims = getLims(x,y,padding,guessX,guessY,ΔL,ΔR,ΔU,ΔD)
+                rx,ry = relative(xlims,ylims,Bx,By)
+                newDiffx=diff(rx,rxTarg); newDiffy=diff(ry,ryTarg)
+                # println("COUNTER = $counter")
+                # println("diffx = $diffx : newDiffx = $newDiffx")
+                # println("rx = $rx : rx target = $rxTarg")
+                # println("diffy = $diffy : newDiffy = $newDiffy")
+                # println("ry = $ry : ry target = $ryTarg")
+                #println("x sign = $signdx; y sign = $signdy")
+                acceptXDir = newDiffx<=diffx; acceptYDir = newDiffy<=diffy
+                if counter>2
+                    println("changing center sign has no effect")
+                    break
+                end
+                counter+=1
+            end
+            return signdx,signdy,guessX,guessY
         end
-    elseif orbiting==0
-        if orbitingList[end]!=0 #last frame was orbiting, so we need to transition back to using all three for center calc
-            transitionPoint=false
-            global extraX = [0.,0.] #reset these
-            global extraY = [0.,0.]
-            if orbitingList[end]==13 #1 and 3 orbiting, so old calc would use this cm
-                cmX=(m[1]*x[1]+m[3]*x[3])/(m[1]+m[3]) #get centers of mass
-                cmY=(m[1]*y[1]+m[3]*y[3])/(m[1]+m[3])
-                xOld=[x[2],cmX]
-                yOld=[y[2],cmY]
-                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
-                global cOffsetY+=sum(yOld)/2-cAllY
-            elseif orbitingList[end]==21 #2 and 1 were orbiting
-                cmX=(m[2]*x[2]+m[1]*x[1])/(m[2]+m[1]) #get centers of mass
-                cmY=(m[2]*y[2]+m[1]*y[1])/(m[2]+m[1])
-                xOld=[x[3],cmX]
-                yOld=[y[3],cmY]
-                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
-                global cOffsetY+=sum(yOld)/2-cAllY
-            elseif orbitingList[end]==23
-                cmX=(m[2]*x[2]+m[3]*x[3])/(m[2]+m[3]) #get centers of mass to use in limit calculations to prevent oscillations
-                cmY=(m[2]*y[2]+m[3]*y[3])/(m[2]+m[3])
-                xOld=[x[1],cmX]
-                yOld=[y[1],cmY]
-                global cOffsetX+=sum(xOld)/2-cAllX #how different is the new center from the old one?
-                global cOffsetY+=sum(yOld)/2-cAllY
+        signdx,signdy,guessX,guessY = getDir(targxlims,targylims,ΔCx,ΔCy,tol,dx,dy)
+        counter = 2
+        stopX = false; stopY = false
+        println("\nfinding shift to tolerance\n")
+        while diffx>tol || diffy>tol
+            if stopX == false
+                guessX = ΔCx+signdx*dx*tol/10*counter
+            end
+            if stopY == false
+                guessY = ΔCy+signdy*dy*tol/10*counter
+            end
+            xlims,ylims = getLims(x,y,padding,guessX,guessY,ΔL,ΔR,ΔU,ΔD)
+            rx,ry = relative(xlims,ylims,Bx,By)
+            diffx=diff(rx,rxTarg); diffy=diff(ry,ryTarg)
+            stopX = diffx<tol; stopY = diffy<tol
+            counter+=1
+            if counter == maxIter
+                println("did not converge in $maxIter iterations")
+                println("diffx = $diffx : diffY = $diffy")
+                println("guessX = $(guessX+cx) : actual X = $targCx\nstarted at X = $(cx+ΔCx) with Δcx = $(signdx*dx*0.001)")
+                println("guessY = $(guessY+cy) : actual Y = $targCy\nstarted at Y = $(cy+ΔCy) with Δcy = $(signdy*dy*0.001)")
+                xrange = tol*2*dx; yrange = tol*2*dy
+                println("x tolerance = $xrange; y tolerance = $yrange")
+                exit()
             end
         end
-        push!(orbitingList,0)
+        println("found suitable shift in $counter iterations")
+        println("diffx = $diffx; diffy = $diffy")
+        return xlims,ylims,guessX,guessY
     end
-    if dx>dy
-        #use x for square
-        xlims=[(cAllX+cOffsetX)-padding-dx/2,(cAllX+cOffsetX)+padding+dx/2]
-        ylims=[(cAllY+cOffsetY)-padding-dx/2,(cAllY+cOffsetY)+padding+dx/2]
+end
+
+relative(xlims,ylims,x,y)=(x-xlims[1])/(xlims[2]-xlims[1]),(y-ylims[1])/(ylims[2]-ylims[1])
+center(xy) = sum(xy)/length(xy)
+
+function comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    function detectQuadrant(orbit,x,y,m,xlims,ylims)
+        #  |------|------|
+        #  |__1___|__2___|
+        #  |  3   |  4   |
+        #  |------|------|
+        orbitStr=string(orbit)
+        i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
+        cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]); cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
+        midX=(xlims[2]-xlims[1])/2; midY=(ylims[2]-ylims[1])/2
+        if cmX<midX && cmY>midY #quad 1
+            return 1
+        elseif cmX>midX && cmY>midY #quad 2
+            return 2
+        elseif cmX<midX && cmY<midY #quad 3
+            return 3
+        else
+            return 4
+        end
+    end
+    orbitStr = orbiting!=0 ? string(orbiting) : string(orbitOld) #was the old one orbiting or is this one orbiting?
+    i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
+    inds = [1,2,3]; otherInd = 0 #trying to make generalization to n-bodies easier
+    for i = 1:length(inds)
+        if inds[i] != i1 && inds[i] != i2
+            otherInd = i
+        end
+    end
+    cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]) #get centers of mass
+    cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
+    xNew=[x[otherInd],cmX]
+    yNew=[y[otherInd],cmY]
+    xlimsOrbit,ylimsOrbit=getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    xlimsNorm,ylimsNorm=getLims(x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    ################# this is what we would have done if DEBUG == 3 #############
+    if stableOld[1] == false
+        global LIMIT_DEBUG = 31
+        if stableOld[2] == 0
+            xtmp = x; ytmp = y
+        else
+            i1,i2,otherInd=stableOld[3],stableOld[4],stableOld[5]
+            cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]) #get centers of mass
+            cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
+            xtmp=[x[otherInd],cmX]
+            ytmp=[y[otherInd],cmY]
+        end
+        # ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
+    #else ############ this is what we would have done if DEBUG == 0 #############
+        # ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
+    end
+    #oldxlims,oldylims = getLims(xtmp,ytmp,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    #oldCx = center(xtmp); oldCy = center(ytmp)
+    #############################################################################
+    function getOld(orbitOld,xlimsOrbit,ylimsOrbit,xlimsNorm,ylimsNorm,x,y,xNew,yNew)
+        if orbitOld != 0 #thing was orbiting
+            oldxlims,oldylims = xlimsOrbit,ylimsOrbit
+            oldCx,oldCy = center(xNew),center(yNew)
+            return oldxlims,oldylims,oldCx,oldCy
+        else
+            oldxlims,oldylims = xlimsNorm,ylimsNorm
+            oldCx,oldCy = center(x),center(y)
+            return oldxlims,oldylims,oldCx,oldCy
+        end
+    end
+    oldxlims,oldylims,oldCx,oldCy = getOld(orbitOld,xlimsOrbit,ylimsOrbit,xlimsNorm,ylimsNorm,x,y,xNew,yNew)
+    if orbiting != 0 #transitioning to orbiting, frame instantaneously wants to shrink
+        global LIMIT_DEBUG
+        if LIMIT_DEBUG == 31
+            global LIMIT_DEBUG = "1.31"
+        else
+            global LIMIT_DEBUG = 1
+        end
+        cx = center(xNew); cy = center(yNew)
+        # ΔCx = cx - (oldCx)
+        # ΔCy = cy - (oldCy)
+
+        # ΔL = xlimsOrbit[1]-oldxlims[1]; ΔR = xlimsOrbit[2]-oldxlims[2]
+        # ΔU = ylimsOrbit[2]-oldylims[2]; ΔD = ylimsOrbit[1]-oldylims[1]
+        extraDx = (xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1])
+        extraDy = (ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1])
+        xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[[x[1],y[1]],[x[2],y[2]],[x[3],y[3]]],extraDx,extraDy,xNew,yNew,padding)
+        ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
+        #xlims, ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+        return xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD
+    else #transitioning from orbiting, frame instantaneously wants to expand
+        global LIMIT_DEBUG
+        if LIMIT_DEBUG == 31
+            global LIMIT_DEBUG = "2.31"
+        else
+            global LIMIT_DEBUG = 2
+        end
+        cx = center(x); cy = center(y)
+        # ΔCx = cx - (oldCx)
+        # ΔCy = cy - (oldCy)
+
+        # ΔL = xlimsNorm[1]-oldxlims[1]; ΔR = xlimsNorm[2]-oldxlims[2]
+        # ΔU = ylimsNorm[2]-oldylims[2]; ΔD = ylimsNorm[1]-oldylims[1]
+        extraDx = 1*((xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1]))
+        extraDy = 1*((ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1]))
+        xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[[x[1],y[1]],[x[2],y[2]],[x[3],y[3]]],extraDx,extraDy,x,y,padding)
+        ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
+        #xlims, ylims = getLims(x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+        return xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD
+    end
+end
+
+function computeLimits(pos,posFuture,padding,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #determines plot limits at each frame, padding in units of pos
+    x=[pos[1],pos[3],pos[5]]
+    y=[pos[2],pos[4],pos[6]]
+    d1_2=sqrt((x[1]-x[2])^2 + (y[1]-y[2])^2)
+    d1_3=sqrt((x[1]-x[3])^2 + (y[1]-y[3])^2)
+    d2_3=sqrt((x[2]-x[3])^2 + (y[2]-y[3])^2)
+    orbiting,xNew,yNew = detectOrbiting(d1_2,d1_3,d2_3,m,x,y)
+    # xtmp=[posFuture[1],posFuture[3],posFuture[5]]
+    # ytmp=[posFuture[2],posFuture[4],posFuture[6]]
+    # d1_2=sqrt((xtmp[1]-xtmp[2])^2 + (ytmp[1]-ytmp[2])^2)
+    # d1_3=sqrt((xtmp[1]-xtmp[3])^2 + (ytmp[1]-ytmp[3])^2)
+    # d2_3=sqrt((xtmp[2]-xtmp[3])^2 + (ytmp[2]-ytmp[3])^2)
+    # stable,xtmp,ytmp = detectOrbiting(d1_2,d1_3,d2_3,m,xtmp,ytmp)
+    # if stable != orbiting
+    #     if orbitOld == 0
+    #         xNew = x; yNew = y
+    #         stable = [false,copy(orbitOld)]
+    #     else
+    #         orbitStr=string(orbitOld)
+    #         i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
+    #         inds = [1,2,3]; otherInd = 0 #trying to make generalization to n-bodies easier
+    #         for i = 1:length(inds)
+    #             if inds[i] != i1 && inds[i] != i2
+    #                 otherInd = i
+    #             end
+    #         end
+    #         cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]) #get centers of mass
+    #         cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
+    #         xNew=[x[otherInd],cmX]
+    #         yNew=[y[otherInd],cmY]
+    #         stable = [false,copy(orbitOld),i1,i2,otherInd]
+    #     end
+    #     global LIMIT_DEBUG = 3
+    #     ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
+    #     xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    # else
+    #     if orbiting != orbitOld
+    #         xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD = comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    #     else
+    #         global LIMIT_DEBUG = 0
+    #         ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
+    #         xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+    #     end
+    #     stable = [true]
+    # end
+    stable = [true]
+    if orbiting != orbitOld
+        xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD = comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
     else
-        #use y for square
-        xlims=[(cAllX+cOffsetX)-padding-dy/2,(cAllX+cOffsetX)+padding+dy/2]
-        ylims=[(cAllY+cOffsetY)-padding-dy/2,(cAllY+cOffsetY)+padding+dy/2]
+        global LIMIT_DEBUG = 0
+        relax = 1
+        ΔCx*=relax;ΔCy*=relax;ΔL*=relax;ΔR*=relax;ΔU*=relax;ΔD*=relax
+        xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
+        #xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[x[1],y[1]],extraDx,extraDy,xNew,yNew,padding))
     end
-    return xlims,ylims,[cAllX+cOffsetX,cAllY+cOffsetY]
+    cNew = [center(xNew)+ΔCx,center(yNew)+ΔCy]
+    return xlims,ylims,cNew,orbiting,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stable
 end
 
 function getColors(m,c) #places colors of objects according to mass/size
@@ -366,8 +527,9 @@ function makeCircleVals(r,center=[0,0])
     return xVals,yVals
 end
 
+LIMIT_DEBUG = 0
 function main()
-    plotData,t,m,rad,collisionBool,collisionInds=getInteresting3Body(15)
+    plotData,t,m,rad,collisionBool,collisionInds=getInteresting3Body(5)
     if collisionBool == true
         println("collision! inds = $collisionInds")
     else
@@ -386,9 +548,6 @@ function main()
         starsY[i]=num[2]
     end
 
-    #this new way runs significantly faster (~2x improvement over @anim)
-    #Downside is it spams folder with png images of every frame and must manually compile with ffmpeg
-    #Comment out and use older way (after this below) if performance/specific formatting is not an issue
     function getRatioRight(ratio,dx,dy)
         if (dx/dy)!=ratio
             if dx>(ratio*dy)
@@ -406,52 +565,57 @@ function main()
        return xlims[1]+rx*(xlims[2]-xlims[1]), ylims[1]+ry*(ylims[2]-ylims[1])
     end
 
-    #plotLoadPath="/home/kirk/Documents/3Body/tmpPlots/"
-    #threeBodyAnim=Animation(plotLoadPath,String[])
-
-    ##### beginning of fancy plot routine, requires compilation of frames manually via ffmpeg
-    #comment all this stuff out and uncomment the old way (beneath this) if you want a "simpler" version/don't like/know how to use ffmpeg
-    global frameNum=1
+    frameNum=1
     stop=length(t)
     if collisionBool==true
         stop=length(t)-600
     end
-    global listInd=0
+    listInd=0
     limList=[]
-    global ratio=1
+    ratio=1
+    offsetX = 0.; offsetY = 0.
+    orbitOld = 0
+    center = [0.,0.]; vel = [0.,0.]
+    ΔCx = 0.;ΔCy = 0.;ΔL = 0.;ΔR = 0.;ΔU = 0.;ΔD = 0.
+    stableOld = [true]
+    global LIMIT_DEBUG
     println("energy loss = $((energy[end]-energy[1])/energy[1]*100) %")
     for i=1:333:stop #this makes animation scale ~1 sec/year with other conditions
         GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
         gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
         pos=[plotData[1][i],plotData[2][i],plotData[3][i],plotData[4][i],plotData[5][i],plotData[6][i]] #current pos
-        limx,limy,center=getLims(pos./1.5e11,15,m) #convert to AU, 10 AU padding
+        future = i+500<stop ? i+500 : i #make sure we don't go past end of data
+        posFuture=[plotData[1][future],plotData[2][future],plotData[3][future],plotData[4][future],plotData[5][future],plotData[6][future]] #future pos
+        limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
-        global listInd #in Julia scope it a for loop like this doesn't know about variables declared outside the loop
-        global ratio
         dx,dy=getRatioRight(ratio,dx,dy)
         if listInd>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-            if dx/oldDx<0.98 #frame shrunk more than 5%
-                limx[1]=center[1]-oldDx*0.98/2
-                limx[2]=center[1]+oldDx*0.98/2
-            elseif dx/oldDx>1.02 #grew more than 5%
-                limx[1]=center[1]-oldDx*1.02/2
-                limx[2]=center[1]+oldDx*1.02/2
-            elseif dy/oldDy<0.98
-                limy[1]=center[2]-oldDy*0.98/2
-                limy[2]=center[2]+oldDy*0.98/2
-            elseif dy/oldDy>1.03
-                limy[1]=center[2]-oldDy*1.02/2
-                limy[2]=center[2]+oldDy*1.02/2
+            if dx/oldDx<0.99 #frame shrunk more than 5%
+                LIMIT_DEBUG = "$LIMIT_DEBUG : 99 x"
+                limx[1]=center[1]-oldDx*0.99/2
+                limx[2]=center[1]+oldDx*0.99/2
+            elseif dx/oldDx>1.01 #grew more than 5%
+                limx[1]=center[1]-oldDx*1.01/2
+                limx[2]=center[1]+oldDx*1.01/2
+                LIMIT_DEBUG = "$LIMIT_DEBUG : 101 x"
+            elseif dy/oldDy<0.99
+                limy[1]=center[2]-oldDy*0.99/2
+                limy[2]=center[2]+oldDy*0.99/2
+                LIMIT_DEBUG = "$LIMIT_DEBUG : 99 y"
+            elseif dy/oldDy>1.01
+                limy[1]=center[2]-oldDy*1.01/2
+                limy[2]=center[2]+oldDy*1.01/2
+                LIMIT_DEBUG = "$LIMIT_DEBUG : 101 y"
             end
         end
         listInd+=1
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
         dx,dy=getRatioRight(ratio,dx,dy)
-        limx[2]=limx[1]+dx
-        limy[2]=limy[1]+dy
+        limx = [center[1]-dx/2,center[1]+dx/2]
+        limy = [center[2]-dy/2,center[2]+dy/2]
         push!(limList,[limx,limy])
         p=plot(plotData[1][1:33:i]./1.5e11,plotData[2][1:33:i]./1.5e11,label="",linewidth=2,linecolor=colors[1],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
         p=plot!(plotData[3][1:33:i]./1.5e11,plotData[4][1:33:i]./1.5e11,label="",linewidth=2,linecolor=colors[2],linealpha=max.((1:33:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
@@ -471,8 +635,10 @@ function main()
 
         tX,tY=relative(p[1],0.31,1.044)#static coords for time relative to parent
         p = annotate!(tX,tY,Plots.text((@sprintf("%0.2f",t[i]/365/24/3600)),"Courier",14,"black"))
+        debugX,debugY = relative(p[1],0.5,0.1)
+        p = annotate!(debugX,debugY,Plots.text("DEBUG = $LIMIT_DEBUG","Times",14,"red"))
         png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
-        global frameNum+=1
+        frameNum+=1
         closeall() #close plots
     end
 
@@ -483,7 +649,8 @@ function main()
             gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
             print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
             pos=[plotData[1][end-(600-i)],plotData[2][end-(600-i)],plotData[3][end-(600-i)],plotData[4][end-(600-i)],plotData[5][end-(600-i)],plotData[6][end-(600-i)]] #current pos
-            limx,limy,center=getLims(pos./1.5e11,15,m) #convert to AU, 15 AU padding
+            posFuture=pos #don't need future position at end
+            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
             p=plot(plotData[1][1:33:end-(600-i)]./1.5e11,plotData[2][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #plot orbits up to i
             p=plot!(plotData[3][1:33:end-(600-i)]./1.5e11,plotData[4][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #linealpha argument causes lines to decay
             p=plot!(plotData[5][1:33:end-(600-i)]./1.5e11,plotData[6][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
@@ -532,7 +699,7 @@ function main()
             p=plot!([subCornersX[2],cornersX[2]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 4 -> corner 4
             #save frame
             png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
-            global frameNum+=1
+            frameNum+=1
             closeall() #close plots
         end
         println("making freeze frame ending")
@@ -541,7 +708,8 @@ function main()
             gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
             print("$(@sprintf("%.2f",i/15*100)) % complete\r") #output percent tracker
             pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
-            limx,limy,center=getLims(pos./1.5e11,15,m) #convert to AU, 15 AU padding
+            posFuture=pos #don't need future position at end
+            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
             p=plot(plotData[1][1:33:end]./1.5e11,plotData[2][1:33:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #plot orbits up to i
             p=plot!(plotData[3][1:33:end]./1.5e11,plotData[4][1:33:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #linealpha argument causes lines to decay
             p=plot!(plotData[5][1:33:end]./1.5e11,plotData[6][1:33:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
@@ -590,7 +758,7 @@ function main()
             p=plot!([subCornersX[2],cornersX[2]],[subCornersY[1],cornersY[1]],c=:white,label = "") #corner 4 -> corner 4
             #save frame
             png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
-            global frameNum+=1
+            frameNum+=1
             closeall() #close plots
         end
     end
@@ -605,7 +773,7 @@ function makeAnim(clean=true)
     end
 end
 
-main()
+#main()
 #makeAnim() #commented out because I compile the frames in the shell script
 
 
