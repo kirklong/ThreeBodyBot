@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-using Plots, Random, Printf, Plots.Measures
+using Plots, Random, Printf, Plots.Measures, Dates
 
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
     function getMass(nBodies) #generate random masses that better reflect actual stellar populations
@@ -103,12 +103,13 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
     x3=zeros(length(t))
     y3=zeros(length(t))
     r,rad,m=initCondGen()
+    initV=copy(r[7:end])
     min12=rad[1]+rad[2]
     min13=rad[1]+rad[3]
     min23=rad[2]+rad[3]
     i=1
     stopT=maximum(t)
-    collisionBool=false; collisionInds=[]
+    collisionBool=false; collisionInds=[0,0]
     #implement RK4 to model solutions to differential equations
     while stop==false
         if currentT==stopT || currentT>stopT #in case of rounding error or something
@@ -161,7 +162,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
             currentT+=stepSize #next step
         end
     end
-    return [x1,y1,x2,y2,x3,y3], t, m, rad, collisionBool, collisionInds
+    return [x1,y1,x2,y2,x3,y3], t, m, rad, collisionBool, collisionInds, initV
 end
 
 function getInteresting3Body(minTime=0) #in years, defaults to 0
@@ -172,11 +173,15 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     i=1
     while interesting==false
         global energy=[] #re-initialize empty energy array
-        plotData,t,m,rad,collisionBool,collisionInds=gen3Body([50,150],500000)
+        plotData,t,m,rad,collisionBool,collisionInds,initV=gen3Body([50,150],500000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
                 write(f,"$(maximum(t)/yearSec)\n")
+            end
+            open("3BodyStats.txt","a") do f
+                initPos=[plotData[1][1],plotData[2][1],plotData[3][1],plotData[4][1],plotData[5][1],plotData[6][1]]./1.5e11 #AU
+                write(f,"$(today()),$(maximum(t)/yearSec),$(m[1]/2e30),$(m[2]/2e30),$(m[3]/2e30),$(rad[1]/7e8),$(rad[2]/7e8),$(rad[3]/7e8),$collisionBool,$(collisionInds[1]),$(collisionInds[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$i\n")
             end
             return plotData,t,m,rad,collisionBool,collisionInds
             interesting=true
@@ -186,6 +191,10 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             println(maximum(t)/yearSec) #how many years simulation runs for
             open("cron_log.txt","a") do f #for cron logging
                 write(f,"found a solution with t = $(maximum(t)/yearSec) in $i iterations\n")
+            end
+            open("3BodyStats.txt","a") do f
+                initPos=[plotData[1][1],plotData[2][1],plotData[3][1],plotData[4][1],plotData[5][1],plotData[6][1]]./1.5e11 #AU
+                write(f,"$(today()),$(maximum(t)/yearSec),$(m[1]/2e30),$(m[2]/2e30),$(m[3]/2e30),$(rad[1]/7e8),$(rad[2]/7e8),$(rad[3]/7e8),$collisionBool,$(collisionInds[1]),$(collisionInds[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$i\n")
             end
             return plotData,t,m,rad,collisionBool,collisionInds
         end
