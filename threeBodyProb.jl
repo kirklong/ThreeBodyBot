@@ -1,8 +1,23 @@
 #!/usr/bin/env julia
+
+# HOW TO RUN THIS SCRIPT:
+# 1: check that you have a recent(ish, >1.0) version of Julia installed
+# 2: within Julia, make sure you have the required packages (below, in the "Using..." statement) installed (I think they all come by default though)
+# 3: make sure you have FFmpeg installed
+# 4: setup an empty sub-directory called "tmpPlots"
+# 5: go to line 693 and uncomment the `makeAnim()` function call
+# 6: save this file
+# 7: run this file (double click it and tell it to run with Julia, open a terminal and type `julia threeBodyProb.jl`, or start a julia session and type `include("threeBodyProb.jl")` )
+# 8: profit
+
+# following the above steps should generate a random three-body problem video in 720p without music
+# to add music, specify initial conditions, or otherwise tinker...read the code/README and the comments in the code!
+# this has only been tested on Linux (Mint) so I'm not sure if the makeAnim() function will work perfectly on mac/windows
+
 using Plots, Random, Printf, Plots.Measures, Dates
 
 function initCondGen() #get random initial conditions for mass/radius, position, and velocity
-    function getMass(nBodies) #generate random masses that better reflect actual stellar populations
+    function getMass(nBodies) #generate random masses that better reflect actual stellar populations, although not currently using because it's boring
         mList=zeros(nBodies)
         N=(0.5^(-1.3)-150^(-1.3))/1.3 #crude approximation of IMF integral assuming alpha = 2.3, stellar mass range of 0.5:150 solar masses
         rescale=1e6
@@ -47,7 +62,7 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     pos3=genPos3(pos1,pos2)
     pos=[pos1[1],pos1[2],pos2[1],pos2[2],pos3[1],pos3[2]].*1.5e11 #convert accepted positions to SI, m
     v=rand(-7e3:7e3,6) #random x & y velocities with mag between -10 & 10 km/s, totally arbitrary...
-    #r=[x1,y1,x2,y2,x3,y3,v1x,v1y,v2x,v2y,v3x,v3y]
+    #r=[x1,y1,x2,y2,x3,y3,v1x,v1y,v2x,v2y,v3x,v3y] -- format if you want to specify your own initial conditions
     r=[pos[1],pos[2],pos[3],pos[4],pos[5],pos[6],v[1],v[2],v[3],v[4],v[5],v[6]]
     open("initCond.txt","w") do f #save initial conditions to file in folder where script is run
         write(f,"m1=$(@sprintf("%.1f",(m[1]/2e30))) m2=$(@sprintf("%.1f",(m[2]/2e30))) m3=$(@sprintf("%.1f",(m[3]/2e30))) (solar masses)\nv1x=$(v[1]/1e3) v1y=$(v[2]/1e3) v2x=$(v[3]/1e3) v2y=$(v[4]/1e3) v3x=$(v[5]/1e3) v3y=$(v[6]/1e3) (km/s)\nx1=$(pos1[1]) y1=$(pos1[2]) x2=$(pos2[1]) y2=$(pos2[2]) x3=$(pos3[1]) y3=$(pos3[2]) (AU from center)")
@@ -166,7 +181,7 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
 end
 
 function getInteresting3Body(minTime=0) #in years, defaults to 0
-    #sometimes random conditions result in a really short animation where things
+    #sometimes (most of the time) random conditions result in a really short animation where things
     #just crash into each other/fly away, so this function throws away those
     yearSec=365*24*3600
     interesting=false
@@ -548,7 +563,7 @@ function main() #pulls everything together, speeds things up to put everything i
             print("$(@sprintf("%.2f",i/600*100)) % complete\r") #output percent tracker
             pos=[plotData[1][end-(600-i)],plotData[2][end-(600-i)],plotData[3][end-(600-i)],plotData[4][end-(600-i)],plotData[5][end-(600-i)],plotData[6][end-(600-i)]] #current pos
             posFuture=pos #don't need future position at end
-            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
+            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
             p=plot(plotData[1][1:33:end-(600-i)]./1.5e11,plotData[2][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #plot orbits up to i
             p=plot!(plotData[3][1:33:end-(600-i)]./1.5e11,plotData[4][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #linealpha argument causes lines to decay
             p=plot!(plotData[5][1:33:end-(600-i)]./1.5e11,plotData[6][1:33:end-(600-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:33:(i+length(t)-600)) .+ 10000 .- (i+length(t)-600),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
@@ -608,7 +623,7 @@ function main() #pulls everything together, speeds things up to put everything i
             print("$(@sprintf("%.2f",i/15*100)) % complete\r") #output percent tracker
             pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
             posFuture=pos #don't need future position at end
-            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
+            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
             p=plot(plotData[1][1:33:end]./1.5e11,plotData[2][1:33:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #plot orbits up to i
             p=plot!(plotData[3][1:33:end]./1.5e11,plotData[4][1:33:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #linealpha argument causes lines to decay
             p=plot!(plotData[5][1:33:end]./1.5e11,plotData[6][1:33:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:33:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
