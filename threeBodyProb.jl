@@ -12,7 +12,7 @@
 
 # following the above steps should generate a random three-body problem video in 720p without music
 # to add music, specify initial conditions, or otherwise tinker...read the code/README and the comments in the code!
-# this has only been tested on Linux (Mint) so I'm not sure if the makeAnim() function will work perfectly on mac/windows
+# this has only been tested on Linux (Mint) and Windows 10, so you might run into small additional issues on macOS?
 
 using Plots, Random, Printf, Plots.Measures, Dates
 
@@ -675,7 +675,7 @@ function main() #pulls everything together, speeds things up to put everything i
     end
 end
 
-#this is a function that will generate the animation for you without having to use the command line, works on Linux, untested elsewhere
+#this is a function that will generate the animation for you without having to use the command line, works on Linux and Windows (run as administrator), untested on macOS
 function makeAnim(clean=true)
     run(`ffmpeg -framerate 30 -i "tmpPlots/frame_%06d.png" -c:v libx264 -preset slow -coder 1 -movflags +faststart -g 15 -crf 18 -pix_fmt yuv420p -profile:v high -y -bf 2 -vf "scale=720:720,setdar=1/1" "threeBody.mp4"`)
     if clean==true
