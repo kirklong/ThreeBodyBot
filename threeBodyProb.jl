@@ -194,7 +194,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             open("cron_log.txt","a") do f #for cron logging, a flag = append
                 write(f,"$(maximum(t)/yearSec)\n")
             end
-            open("3BodyStats.txt","a") do f
+            open("3BodyStats.txt","a") do f #for stats logging
                 initPos=[plotData[1][1],plotData[2][1],plotData[3][1],plotData[4][1],plotData[5][1],plotData[6][1]]./1.5e11 #AU
                 write(f,"$(today()),$(maximum(t)/yearSec),$(m[1]/2e30),$(m[2]/2e30),$(m[3]/2e30),$(rad[1]/7e8),$(rad[2]/7e8),$(rad[3]/7e8),$collisionBool,$(collisionInds[1]),$(collisionInds[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$i\n")
             end
@@ -207,7 +207,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
             open("cron_log.txt","a") do f #for cron logging
                 write(f,"found a solution with t = $(maximum(t)/yearSec) in $i iterations\n")
             end
-            open("3BodyStats.txt","a") do f
+            open("3BodyStats.txt","a") do f #log stats, see "3BodyAnalysis.ipynb"
                 initPos=[plotData[1][1],plotData[2][1],plotData[3][1],plotData[4][1],plotData[5][1],plotData[6][1]]./1.5e11 #AU
                 write(f,"$(today()),$(maximum(t)/yearSec),$(m[1]/2e30),$(m[2]/2e30),$(m[3]/2e30),$(rad[1]/7e8),$(rad[2]/7e8),$(rad[3]/7e8),$collisionBool,$(collisionInds[1]),$(collisionInds[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$i\n")
             end
