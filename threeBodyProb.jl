@@ -280,7 +280,6 @@ function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=
             acceptXDir = false; acceptYDir = false
             signdx = diffx<tol ? 0 : -1; signdy = diffy<tol ? 0 : -1
             counter = 1
-            println("\nfinding sign directions for center shifts\n")
             while acceptXDir == false || acceptYDir == false
                 if acceptXDir == false
                     signdx=signdx^counter #flip the direction if what we tried before didn't work
@@ -294,7 +293,7 @@ function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=
                 newDiffx=diff(rx,rxTarg); newDiffy=diff(ry,ryTarg)
                 acceptXDir = newDiffx<=diffx; acceptYDir = newDiffy<=diffy #are we going in the right direction?
                 if counter>2
-                    println("changing center sign has no effect")
+                    println("PROBLEM: changing center sign has no effect")
                     break
                 end
                 counter+=1
@@ -304,7 +303,6 @@ function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=
         signdx,signdy,guessX,guessY = getDir(targxlims,targylims,ΔCx,ΔCy,tol,dx,dy)
         counter = 2
         stopX = false; stopY = false
-        println("\nfinding shift to tolerance\n")
         while diffx>tol || diffy>tol #keep guessing in the right direction until we're within the tolerance
             #this could actaully probably just be calculated? whatever "if it ain't broke don't fix it" and
             #this is not high performance code
@@ -320,12 +318,10 @@ function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=
             stopX = diffx<tol; stopY = diffy<tol #compare new guesses and see if we should stop guessing
             counter+=1
             if counter == maxIter
-                println("did not converge in $maxIter iterations")
+                println("PROBLEM: did not converge in $maxIter iterations")
                 break
             end
         end
-        println("found suitable shift in $counter iterations")
-        println("diffx = $diffx; diffy = $diffy")
         return xlims,ylims,guessX,guessY
     end
 end
@@ -441,11 +437,12 @@ function makeCircleVals(r,center=[0,0]) #makes circle values for the stars to pl
 end
 
 function main() #pulls everything together, speeds things up to put everything in a function + gets rid of bad global syntax
+    println("sit tight -- finding an interesting solution")
     plotData,t,m,rad,collisionBool,collisionInds=getInteresting3Body(15) #find an interesting solution at least 15 years
     if collisionBool == true
         println("collision! inds = $collisionInds")
     else
-        println("no collision :(")
+        println("no collision")
     end
 
     c=[:DodgerBlue,:Gold,:Tomato] #most massive to least massive, also roughly corresponds to temp
@@ -687,8 +684,11 @@ function makeAnim(clean=true)
     end
 end
 
+
+
 #generate frames!
 main()
+
 #generate the animation!
 #makeAnim() #commented out because I compile the frames in the shell script (see 3BodyShell.sh)
 
