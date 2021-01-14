@@ -19,11 +19,11 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
     rad=rad.*7e8 #convert to SI m
-    pos1=rand(-10:10,2) #random initial coordinates x & y for first body, AU
+    pos1=rand(-35:35,2) #random initial coordinates x & y for first body, AU
     function genPos2(pos1)
         accept2=false
         while accept2==false
-            pos2=rand(-10:10,2) #random initial coordinates for second body, AU
+            pos2=rand(-35:35,2) #random initial coordinates for second body, AU
             dist21=sqrt((pos1[1]-pos2[1])^2+(pos1[2]-pos2[2])^2)
             if (dist21*1.5e11)>(rad[1]+rad[2]) #they aren't touching
                 accept2=true
@@ -35,7 +35,7 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     function genPos3(pos1,pos2)
         accept3=false
         while accept3==false
-            pos3=rand(-10:10,2) #random initial coordinates for third body, AU
+            pos3=rand(-35:35,2) #random initial coordinates for third body, AU
             dist31=sqrt((pos1[1]-pos3[1])^2+(pos1[2]-pos3[2])^2)
             dist32=sqrt((pos2[1]-pos3[1])^2+(pos2[2]-pos3[2])^2)
             if (dist31*1.5e11)>(rad[1]+rad[3]) && (dist32*1.5e11)>(rad[2]+rad[3]) #3rd isn't touching either
@@ -224,8 +224,8 @@ function getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
     cX,cY=sum(xNew)/length(xNew),sum(yNew)/length(yNew) #next thing to change..?
     dx=maximum(xNew)-minimum(xNew); dy=maximum(yNew)-minimum(yNew)
     dF = dx<dy ? dy : dx
-    xlims=[(cX+ΔCx)-padding-dF/2-ΔL,(cX+ΔCx)+padding+dF/2+ΔR]
-    ylims=[(cY+ΔCy)-padding-dF/2-ΔD,(cY+ΔCy)+padding+dF/2+ΔU]
+    xlims=[(cX+ΔCx)-padding-dF/2+ΔL,(cX+ΔCx)+padding+dF/2+ΔR]
+    ylims=[(cY+ΔCy)-padding-dF/2+ΔD,(cY+ΔCy)+padding+dF/2+ΔU]
     return xlims,ylims
 end
 
@@ -235,7 +235,8 @@ function getΔC(target,start,pos,extraDx,extraDy,x,y,padding,tol=0.0001,maxIter=
     ΔCx,ΔCy = cx-targCx,cy-targCy
     diffxList = [0.,0.,0.]; diffyList = [0.,0.,0.]
     xtargList = [0.,0.,0.]; ytargList = [0.,0.,0.]
-    ΔL = ΔR = extraDx/2; ΔU = ΔD = extraDy/2
+#    ΔL = ΔR = extraDx/2; ΔU = ΔD = extraDy/2
+    ΔL,ΔR = extraDx; ΔU,ΔD = extraDy
     xlims,ylims = getLims(x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
     diff(r,rTarg)=abs(r-rTarg)
     for i = 1:length(pos)
@@ -319,25 +320,6 @@ relative(xlims,ylims,x,y)=(x-xlims[1])/(xlims[2]-xlims[1]),(y-ylims[1])/(ylims[2
 center(xy) = sum(xy)/length(xy)
 
 function comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
-    function detectQuadrant(orbit,x,y,m,xlims,ylims)
-        #  |------|------|
-        #  |__1___|__2___|
-        #  |  3   |  4   |
-        #  |------|------|
-        orbitStr=string(orbit)
-        i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
-        cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]); cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
-        midX=(xlims[2]-xlims[1])/2; midY=(ylims[2]-ylims[1])/2
-        if cmX<midX && cmY>midY #quad 1
-            return 1
-        elseif cmX>midX && cmY>midY #quad 2
-            return 2
-        elseif cmX<midX && cmY<midY #quad 3
-            return 3
-        else
-            return 4
-        end
-    end
     orbitStr = orbiting!=0 ? string(orbiting) : string(orbitOld) #was the old one orbiting or is this one orbiting?
     i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
     inds = [1,2,3]; otherInd = 0 #trying to make generalization to n-bodies easier
@@ -394,12 +376,13 @@ function comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,
         # ΔCx = cx - (oldCx)
         # ΔCy = cy - (oldCy)
 
-        # ΔL = xlimsOrbit[1]-oldxlims[1]; ΔR = xlimsOrbit[2]-oldxlims[2]
-        # ΔU = ylimsOrbit[2]-oldylims[2]; ΔD = ylimsOrbit[1]-oldylims[1]
-        extraDx = (xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1])
-        extraDy = (ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1])
+        ΔL = oldxlims[1]-xlimsOrbit[1]; ΔR = oldxlims[2]-xlimsOrbit[2]
+        ΔU = oldylims[2]-ylimsOrbit[2]; ΔD = oldylims[1]-ylimsOrbit[1]
+        # extraDx = (xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1])
+        # extraDy = (ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1])
+        extraDx=[ΔL,ΔR]; extraDy=[ΔU,ΔD]
         xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[[x[1],y[1]],[x[2],y[2]],[x[3],y[3]]],extraDx,extraDy,xNew,yNew,padding)
-        ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
+        # ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
         #xlims, ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
         return xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD
     else #transitioning from orbiting, frame instantaneously wants to expand
@@ -413,12 +396,13 @@ function comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,
         # ΔCx = cx - (oldCx)
         # ΔCy = cy - (oldCy)
 
-        # ΔL = xlimsNorm[1]-oldxlims[1]; ΔR = xlimsNorm[2]-oldxlims[2]
-        # ΔU = ylimsNorm[2]-oldylims[2]; ΔD = ylimsNorm[1]-oldylims[1]
-        extraDx = 1*((xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1]))
-        extraDy = 1*((ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1]))
+        ΔL = oldxlims[1]-xlimsNorm[1]; ΔR = oldxlims[2]-xlimsNorm[2]
+        ΔU = oldylims[2]-ylimsNorm[2]; ΔD = oldylims[1]-ylimsNorm[1]
+        extraDx=[ΔL,ΔR]; extraDy=[ΔU,ΔD]
+        # extraDx = 1*((xlimsOrbit[2]-xlimsOrbit[1]) - (oldxlims[2]-oldxlims[1]))
+        # extraDy = 1*((ylimsOrbit[2]-ylimsOrbit[1]) - (oldylims[2]-oldylims[1]))
         xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[[x[1],y[1]],[x[2],y[2]],[x[3],y[3]]],extraDx,extraDy,x,y,padding)
-        ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
+        # ΔL = extraDx/2; ΔR = extraDx/2; ΔU = extraDy/2; ΔD = extraDy/2
         #xlims, ylims = getLims(x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
         return xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD
     end
@@ -431,55 +415,17 @@ function computeLimits(pos,posFuture,padding,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,Δ
     d1_3=sqrt((x[1]-x[3])^2 + (y[1]-y[3])^2)
     d2_3=sqrt((x[2]-x[3])^2 + (y[2]-y[3])^2)
     orbiting,xNew,yNew = detectOrbiting(d1_2,d1_3,d2_3,m,x,y)
-    # xtmp=[posFuture[1],posFuture[3],posFuture[5]]
-    # ytmp=[posFuture[2],posFuture[4],posFuture[6]]
-    # d1_2=sqrt((xtmp[1]-xtmp[2])^2 + (ytmp[1]-ytmp[2])^2)
-    # d1_3=sqrt((xtmp[1]-xtmp[3])^2 + (ytmp[1]-ytmp[3])^2)
-    # d2_3=sqrt((xtmp[2]-xtmp[3])^2 + (ytmp[2]-ytmp[3])^2)
-    # stable,xtmp,ytmp = detectOrbiting(d1_2,d1_3,d2_3,m,xtmp,ytmp)
-    # if stable != orbiting
-    #     if orbitOld == 0
-    #         xNew = x; yNew = y
-    #         stable = [false,copy(orbitOld)]
-    #     else
-    #         orbitStr=string(orbitOld)
-    #         i1,i2=parse(Int64,string(orbitStr[1])),parse(Int64,string(orbitStr[2])) #indices of two orbiting bodies
-    #         inds = [1,2,3]; otherInd = 0 #trying to make generalization to n-bodies easier
-    #         for i = 1:length(inds)
-    #             if inds[i] != i1 && inds[i] != i2
-    #                 otherInd = i
-    #             end
-    #         end
-    #         cmX=(m[i1]*x[i1]+m[i2]*x[i2])/(m[i1]+m[i2]) #get centers of mass
-    #         cmY=(m[i1]*y[i1]+m[i2]*y[i2])/(m[i1]+m[i2])
-    #         xNew=[x[otherInd],cmX]
-    #         yNew=[y[otherInd],cmY]
-    #         stable = [false,copy(orbitOld),i1,i2,otherInd]
-    #     end
-    #     global LIMIT_DEBUG = 3
-    #     ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
-    #     xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
-    # else
-    #     if orbiting != orbitOld
-    #         xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD = comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
-    #     else
-    #         global LIMIT_DEBUG = 0
-    #         ΔCx*=0.9;ΔCy*=0.9;ΔL*=0.9;ΔR*=0.9;ΔU*=0.9;ΔD*=0.9
-    #         xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
-    #     end
-    #     stable = [true]
-    # end
     stable = [true]
     if orbiting != orbitOld
         xlims,ylims,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD = comparePos(stableOld,orbitOld,orbiting,m,x,y,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
     else
         global LIMIT_DEBUG = 0
-        relax = 1
+        relax = 0.95
         ΔCx*=relax;ΔCy*=relax;ΔL*=relax;ΔR*=relax;ΔU*=relax;ΔD*=relax
         xlims,ylims = getLims(xNew,yNew,padding,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD)
         #xlims,ylims,ΔCx,ΔCy = getΔC([oldCx,oldCy,oldxlims,oldylims],[cx,cy],[x[1],y[1]],extraDx,extraDy,xNew,yNew,padding))
     end
-    cNew = [center(xNew)+ΔCx,center(yNew)+ΔCy]
+    cNew = [(xlims[2]-xlims[1])/2+xlims[1],(ylims[2]-ylims[1])/2+ylims[1]]
     return xlims,ylims,cNew,orbiting,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stable
 end
 
@@ -549,14 +495,16 @@ function main()
     end
 
     function getRatioRight(ratio,dx,dy)
+        which = "x"
         if (dx/dy)!=ratio
             if dx>(ratio*dy)
                 dy=dx/ratio
             else
                 dx=dy*ratio
+                which = "y"
             end
         end
-        return dx,dy
+        return dx,dy,which
     end
 
     function relative(p::Plots.Subplot, rx, ry) #so I can plot in relative to parent
@@ -589,31 +537,40 @@ function main()
         posFuture=[plotData[1][future],plotData[2][future],plotData[3][future],plotData[4][future],plotData[5][future],plotData[6][future]] #future pos
         limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD,stableOld) #convert to AU, 10 AU padding
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
-        dx,dy=getRatioRight(ratio,dx,dy)
+        dx,dy,which0=getRatioRight(ratio,dx,dy)
         if listInd>1
             oldLimx,oldLimy=limList[listInd][1],limList[listInd][2]
             oldDx,oldDy=oldLimx[2]-oldLimx[1],oldLimy[2]-oldLimy[1]
-            if dx/oldDx<0.99 #frame shrunk more than 5%
+            maxContraction=0.98; maxExpansion=1.02
+            if dx/oldDx<maxContraction #frame shrunk more than 5%
                 LIMIT_DEBUG = "$LIMIT_DEBUG : 99 x"
-                limx[1]=center[1]-oldDx*0.99/2
-                limx[2]=center[1]+oldDx*0.99/2
-            elseif dx/oldDx>1.01 #grew more than 5%
-                limx[1]=center[1]-oldDx*1.01/2
-                limx[2]=center[1]+oldDx*1.01/2
+                limx[1]=center[1]-oldDx*maxContraction/2
+                limx[2]=center[1]+oldDx*maxContraction/2
+                limy[1]=center[2]-oldDx*maxContraction/2
+                limy[2]=center[2]+oldDx*maxContraction/2
+            elseif dx/oldDx>maxExpansion #grew more than 5%
+                limx[1]=center[1]-oldDx*maxExpansion/2
+                limx[2]=center[1]+oldDx*maxExpansion/2
+                limy[1]=center[2]-oldDx*maxExpansion/2
+                limy[2]=center[2]+oldDx*maxExpansion/2
                 LIMIT_DEBUG = "$LIMIT_DEBUG : 101 x"
-            elseif dy/oldDy<0.99
-                limy[1]=center[2]-oldDy*0.99/2
-                limy[2]=center[2]+oldDy*0.99/2
+            elseif dy/oldDy<maxContraction
+                limx[1]=center[1]-oldDy*maxContraction/2
+                limx[2]=center[1]+oldDy*maxContraction/2
+                limy[1]=center[2]-oldDy*maxContraction/2
+                limy[2]=center[2]+oldDy*maxContraction/2
                 LIMIT_DEBUG = "$LIMIT_DEBUG : 99 y"
-            elseif dy/oldDy>1.01
-                limy[1]=center[2]-oldDy*1.01/2
-                limy[2]=center[2]+oldDy*1.01/2
+            elseif dy/oldDy>maxExpansion
+                limx[1]=center[1]-oldDy*maxExpansion/2
+                limx[2]=center[1]+oldDy*maxExpansion/2
+                limy[1]=center[2]-oldDy*maxExpansion/2
+                limy[2]=center[2]+oldDy*maxExpansion/2
                 LIMIT_DEBUG = "$LIMIT_DEBUG : 101 y"
             end
         end
         listInd+=1
         dx,dy=(limx[2]-limx[1]),(limy[2]-limy[1])
-        dx,dy=getRatioRight(ratio,dx,dy)
+        dx,dy,whichF=getRatioRight(ratio,dx,dy)
         limx = [center[1]-dx/2,center[1]+dx/2]
         limy = [center[2]-dy/2,center[2]+dy/2]
         push!(limList,[limx,limy])
@@ -632,11 +589,14 @@ function main()
         p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt:     years after start",
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),tickfontcolor=:white,
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8,legendtitlefont="Courier") #add in axes/title/legend with formatting
+        p=scatter!([center[1]],[center[2]],color=:red,label="center",marker=:xcross)
 
         tX,tY=relative(p[1],0.31,1.044)#static coords for time relative to parent
         p = annotate!(tX,tY,Plots.text((@sprintf("%0.2f",t[i]/365/24/3600)),"Courier",14,"black"))
         debugX,debugY = relative(p[1],0.5,0.1)
+        leftX,leftY = relative(p[1],0.1,0.5)
         p = annotate!(debugX,debugY,Plots.text("DEBUG = $LIMIT_DEBUG","Times",14,"red"))
+        p = annotate!(leftX,leftY,Plots.text("frame size = $(round(limy[2]-limy[1],sigdigits=3)) AU\nusing $which0 prior to correction, $whichF after","Times",14,"red",rotation = 90))
         png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
         frameNum+=1
         closeall() #close plots
