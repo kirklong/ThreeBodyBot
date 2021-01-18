@@ -1,6 +1,6 @@
 # Random Three-Body Simulation Generator (***with Twitter bot***)
 
-<img align="left" src="figure8.gif" width="400" height="400">
+<img align="left" src="figure8.gif" width="380" height="380">
 
 A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2001)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 
@@ -14,7 +14,6 @@ A cool stable solution to the three-body problem created by the code, based off 
 
 "shit I should really improve this code now that people other than me might look at it" – [@ThreeBodyBot's inept parent](https://www.kirklong.space)
 
-<br/><br/>
 <br/><br/>
 
 ### The three-body simulation generator
