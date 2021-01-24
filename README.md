@@ -1,6 +1,8 @@
 # Random Three-Body Simulation Generator (***with Twitter bot***)
 
-See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
+<img align="left" src="figure8.gif" width="380" height="380">
+
+A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 
 ### What people are saying about @ThreeBodyBot:
 
@@ -11,6 +13,8 @@ See all animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
 "is this trisolaran propaganda" – [adam from Twitter](https://twitter.com/gains_tweets/status/1263103612168712194)
 
 "shit I should really improve this code now that people other than me might look at it" – [@ThreeBodyBot's inept parent](https://www.kirklong.space)
+
+<br/><br/>
 
 ### The three-body simulation generator
 This is a fun little pet project I put together in Julia that renders a random gravitational three-body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally. This thing is now pretty much finalized, or at least at v1.0.
