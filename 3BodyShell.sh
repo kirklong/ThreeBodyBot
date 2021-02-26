@@ -43,7 +43,7 @@ rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%23)) #get number between 1 and 23
+num=$((1+RANDOM%25)) #get number between 1 and 25
 if [ $num -eq 1 ]; then
   echo 'Music: Adagio for Strings – Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
@@ -90,6 +90,10 @@ elif [ $num -eq 22 ]; then
   echo 'Music: What Did You Do (The Expanse) – Shorter' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 23 ]; then
   echo 'Music: Waltz of the Flowers – Tchaikovsky' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 24 ]; then
+  echo 'Music: Memories of Green – Vangelis' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 25 ]; then
+  echo 'Music: Memories of Green – Vangelis' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 
 musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
@@ -99,5 +103,5 @@ combinedAACOut="3Body_fps30_wMusicAAC.mp4"
 ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine audio w/video
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
 cd twitterbot
-#./server.js
+./server.js
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt

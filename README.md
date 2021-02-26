@@ -17,7 +17,7 @@ A cool stable solution to the three-body problem created by the code, based off 
 <br/><br/>
 
 ### The three-body simulation generator
-This is a fun little pet project I put together in Julia that renders a random gravitational three-body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally. This thing is now pretty much finalized, or at least at v1.0. As of January 2021 the bot has also started tracking its stats, outputting the results of each night's simulation into a text file (`3BodyStats.txt`) that's read in and analyzed with the notebook [`3BodyAnalysis.ipynb`](3BodyAnalysis.ipynb), which makes a pretty array of plots showcasing where the bot has been. 
+This is a fun little pet project I put together in Julia that renders a random gravitational three-body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally. This thing is now pretty much finalized, or at least at v1.0. As of January 2021 the bot has also started tracking its stats, outputting the results of each night's simulation into a text file (`3BodyStats.txt`) that's read in and analyzed with the notebook [`3BodyAnalysis.ipynb`](3BodyAnalysis.ipynb), which makes a pretty array of plots showcasing where the bot has been.
 
 
 ### New and exciting! Introducing n-body generator...
@@ -46,7 +46,7 @@ The [`3BodySetup.ipynb`](3BodySetup.ipynb) notebook is more of the stream of con
 
 The shell script ([`3BodyShell.sh`](3BodyShell.sh)) depends almost entirely on filepaths to my machine and requires use of the Twitter API through the [`server.js`](twitterbot/server.js) script but is a good template to base your own off of (if you desire), and the FFmpeg command there by itself may be useful. It's also fun if you just want to see the entire pipeline for how the animations get generated and posted start to finish.
 
-**If you want to make n-body simulations**, you need either the [`requests.jl`](nbody/requests.jl) or [`namedBody.jl`](nbody/namedBody.jl) code from the `nbody` folder – use the `namedBody.jl` version if you want to give the stars actual names (as opposed to just masses) and the `requests.jl` version for everything else. Yes, reader, I could (and probably should) have combined these into one file but I'm exceptionally lazy and for some reason thought it was easier to make two when I did it late the other night so sorry. Both of these scripts have command line arguments that change interactivity. For example, to generate square frames for a 10 body simulation with random masses, colors, and without fun names one would execute something like `julia requests.jl 10 0 0 0`. Like in the three-body code you will need to alter the filepath to where the frames are saved, and use something like FFmpeg to compile the frames after they are generated. 
+**If you want to make n-body simulations**, you need either the [`requests.jl`](nbody/requests.jl) or [`namedBody.jl`](nbody/namedBody.jl) code from the `nbody` folder – use the `namedBody.jl` version if you want to give the stars actual names (as opposed to just masses) and the `requests.jl` version for everything else. Yes, reader, I could (and probably should) have combined these into one file but I'm exceptionally lazy and for some reason thought it was easier to make two when I did it late the other night so sorry. Both of these scripts have command line arguments that change interactivity. For example, to generate square frames for a 10 body simulation with random masses, colors, and without fun names one would execute something like `julia requests.jl 10 0 0 0`. Like in the three-body code you will need to alter the filepath to where the frames are saved, and use something like FFmpeg to compile the frames after they are generated.
 
 ### Prerequisites
 
@@ -124,33 +124,35 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   8. Time (from the Inception soundtrack) – Zimmer (piano cover and recording by me)
 
   9. [I Need a Ride (from The Expanse season 3 soundtrack) – Shorter](https://www.youtube.com/watch?v=sbWmzoL4FwM)
-  
+
   10. Prelude in E Minor – Chopin (recorded by me)
-  
+
   11. Nocturne in C# Minor (Posthumous) – Chopin (recorded by me)
-  
+
   12. Battlestar Sonatica (from the Battlestar Galactica season 3 soundtrack) – McCreary (recorded by me)
-  
+
   13. Rhapsody in Blue (solo piano version) – Gershwin (recorded by me)
-  
+
   14. Passacaglia (from the Battlestar Galactica season 2 soundtrack) – McCreary (piano cover recorded by me)
-  
+
   15. Prelude in G Minor – Rachmaninoff (recorded by me)
-  
+
   16. Prelude in C# Minor – Rachmaninoff (recorded by me)
-  
+
   17. The Shape of Things to Come (from the Battlestar Galactica season 2 soundtrack) – McCreary (piano cover recorded by me)
-  
+
   18. Prelude in C Major – Bach (recorded by me)
-  
+
   19. Liebestraum – Liszt (recorded by me)
-  
+
   20. Where is My Mind – Pixies (piano cover by Maxence Cyrin, recorded by me)
-  
+
   21. Lost (from The Expanse season 2 soundtrack) – Shorter (piano cover and recording by me)
-  
+
   22. What Did You Do (from The Expanse season 2 soundtrack) – Shorter (piano cover and recording by me)
-  
+
   23. [Waltz of the Flowers – Tchaikovsky](https://www.youtube.com/watch?v=QxHkLdQy5f0)
-  
+
+  24. Memories of Green (from the Bladerunner soundtrack) – Evangelis (piano cover and recording by me, this one has two different sections recorded the bot randomly picks from)
+
 **Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith – they have either not replied or granted permission for this limited use. I've also tried to record my own versions of all pieces used (when possible), putting my music minor to good use and hopefully further mitigating any copyright issues. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
