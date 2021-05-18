@@ -541,11 +541,11 @@ function main() #pulls everything together, speeds things up to put everything i
         p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
         p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
             background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,legendfontfamily="Courier") #formatting for plot frame
-        p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt:     years after start",
+        p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt:      years after start",
             legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),tickfontcolor=:white,
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8,legendtitlefont="Courier") #add in axes/title/legend with formatting
 
-        tX,tY=relative(p[1],0.31,1.044)#static coords for time relative to parent
+        tX,tY=relative(p[1],0.3,1.044)#static coords for time relative to parent
         p = annotate!(tX,tY,Plots.text((@sprintf("%0.2f",t[i]/365/24/3600)),"Courier",14,"black"))
         png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
         frameNum+=1
