@@ -188,7 +188,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     i=1
     while interesting==false
         global energy=[] #re-initialize empty energy array
-        plotData,t,m,rad,collisionBool,collisionInds,initV=gen3Body([60,150],600000)
+        plotData,t,m,rad,collisionBool,collisionInds,initV=gen3Body([60,200],600000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
