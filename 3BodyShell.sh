@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ## first path is for old computer, second for new
-#PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kirk #needed for cron automation because cron gets limited env variables
-PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/home/kirk/perl5/perlbrew/bin:/home/kirk/perl5/perlbrew/perls/perl-5.24.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+PATH=.:/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/home/kirk/perl5/perlbrew/bin:/home/kirk/perl5/perlbrew/perls/perl-5.24.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+#PATH=.:/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/home/kirk/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/kirk/julia-1.6.1/bin
 #PATH=/home/kirk/Documents/research/MESA/mesasdk/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/bin:/home/kirk/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
 #specify ulimit explicitly just in case cron doesn't get the memo
 ulimit -n 4096
