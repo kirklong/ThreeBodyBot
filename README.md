@@ -50,6 +50,8 @@ The shell script ([`3BodyShell.sh`](3BodyShell.sh)) depends almost entirely on f
 
 The code is licensed (as of 9/25/2021) with the [GNU General Public License v3.0](LICENSE), which in TL;DR form essentially means you can do whatever you like with this code *as long as you keep it open-source and freely available*. A couple people have reached out to ask if they can make NFTs with the code, which I've politely declined as I think that goes against the spirit of the project and the GNU License (NFTs are inherently *not* free and open-source by design). 
 
+If you want to see how the bot works under the hood, check out the [`NumericsTutorial`](NumericsTutorial) folder, which contains a ready-to-run notebook that walks through the math/numerics of how the bot works, culminating in a fun n-body simulator at the end!
+
 ### Prerequisites
 
 To run the Julia code you will need [Julia](https://julialang.org/downloads/platform.html) installed on your machine and within Julia you will need the Plots, Random, and Printf [packages installed](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html). If you want to run the Jupyter Notebook you will also need to have the [IJulia package](https://github.com/JuliaLang/IJulia.jl).
