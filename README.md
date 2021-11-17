@@ -20,7 +20,7 @@ A cool stable solution to the three-body problem created by the code, based off 
 This is a fun little pet project I put together in Julia that renders a random gravitational three-body simulation in two dimensions. It's a simple program that uses an explicit implementation of fourth order Runge-Kutta with a fixed step size to simulate the system over a specified timescale. In addition to stopping after a specified amount of time, the simulation will quit if there is a collision between bodies or one or more bodies is ejected from the system. It then makes a pretty animation (complete with randomly generated fake background stars!) and saves it locally. This thing is now pretty much finalized, or at least at v1.0. As of January 2021 the bot has also started tracking its stats, outputting the results of each night's simulation into a text file (`3BodyStats.txt`) that's read in and analyzed with the notebook [`3BodyAnalysis.ipynb`](3BodyAnalysis.ipynb), which makes a pretty array of plots showcasing where the bot has been. The longest "solution" the bot has ever found was a system that lasted a little over 500 years, and you can find that immortalized [here](https://www.youtube.com/watch?v=JBzDRFJi6KQ). The previous record was 207 years, and that solution is immortalized here as [longestRunnerUp.mp4](longestRunnerUP.mp4).
 
 
-### New and exciting! Introducing n-body generator...
+### A lazy n-body generator...
 There are several scripts in the `nbody` folder worth looking at if you are looking to create even more gravitational chaos. These will start occasionally popping up on the bot's Twitter (currently a 1 in 10 chance each day), and there are new instructions below that should get you started if you want to try to make one of these yourself! The camera implementation with these is still a little buggy though...so if you have great ideas on what should be done to improve it please do so and I will happily credit and merge your changes. I think I can apply the improved camera system from the three-body versions here, but I need to actually sit down and spend a day doing it...
 
 ### The Twitter bot
@@ -32,7 +32,10 @@ To tweet from a script you need a developer account with Twitter so that you can
 
 ## Want to generate your own animations?
 
-***Overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org fighting for civil rights  (ie places like the [Equal Justice Initiative](https://eji.org/), [Human Rights Campaign](https://www.hrc.org/), [ACLU](https://www.aclu.org/), etc.)  and I will do the heavy lifting for you! I will happily make you a classic three-body version, a 3D three-body version, or you can request one of my new fancy new n-body simulations – you can even pick colors and name the stars!  ***Now back to the details...***
+***Overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org fighting for civil rights  (ie places like the [Equal Justice Initiative](https://eji.org/), [Human Rights Campaign](https://www.hrc.org/), [ACLU](https://www.aclu.org/), etc.)  and I will do the heavy lifting for you! I will happily make you a classic three-body version, a 3D three-body version, or you can request one of my new fancy new n-body simulations – you can even pick colors and name the stars!  Here's an example of a fun custom thing I recently put together in honor of the new Dune movie: 
+[Dune.gif](Dune/Dune.gif)
+
+***Now back to the details...***
 
 If you're on Windows, there's now a 15 minute [tutorial video](https://www.youtube.com/watch?v=bXrXwgC9Ltk&feature=youtu.be) that walks you through the entire process, from installing Julia to making your first animation! If there's interest I will also make one demonstrating the process on Linux, but I'm assuming most people who are running Linux won't need/want a tutorial. Unfortunately I don't have access to a Mac, so can't make one for macOS. Hopefully between the Windows video and the instructions below you can sort it out, sorry!
 
@@ -50,7 +53,7 @@ The shell script ([`3BodyShell.sh`](3BodyShell.sh)) depends almost entirely on f
 
 The code is licensed (as of 9/25/2021) with the [GNU General Public License v3.0](LICENSE), which in TL;DR form essentially means you can do whatever you like with this code *as long as you keep it open-source and freely available*. A couple people have reached out to ask if they can make NFTs with the code, which I've politely declined as I think that goes against the spirit of the project and the GNU License (NFTs are inherently *not* free and open-source by design). 
 
-If you want to see how the bot works under the hood, check out the [`NumericsTutorial`](NumericsTutorial) folder, which contains a ready-to-run notebook that walks through the math/numerics of how the bot works, culminating in a fun n-body simulator at the end!
+If you want to see how the bot works under the hood, check out the [`NumericsTutorial`](NumericsTutorial) folder, which contains a ready-to-run notebook that walks through the math/numerics of how the bot works, culminating in a fun n-body simulator at the end! The fun Dune example linked above was created based on this notebook, so if you want to do n-body simulations with sand worms check out [`Dune/Worm.ipynb`](Dune/Worm.ipynb) in the Dune folder.
 
 ### Prerequisites
 
@@ -158,5 +161,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   23. [Waltz of the Flowers – Tchaikovsky](https://www.youtube.com/watch?v=QxHkLdQy5f0)
 
   24. Memories of Green (from the Bladerunner soundtrack) – Evangelis (piano cover and recording by me, this one has two different sections recorded the bot randomly picks from)
+  
+  25. Dune (2021) Medley – Zimmer (piano cover and recording by me)
 
 **Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith – they have either not replied or granted permission for this limited use. I've also tried to record my own versions of all pieces used (when possible), putting my music minor to good use and hopefully further mitigating any copyright issues. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
