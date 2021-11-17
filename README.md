@@ -28,7 +28,7 @@ This is my first experience with JavaScript and the Twitter API, so it's mostly 
 
 It's a really basic program but it works (mostly anyways).
 
-To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see `configSample.js`).
+To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)).
 
 ## Want to generate your own animations?
 
@@ -60,7 +60,7 @@ If you want to see how the bot works under the hood, check out the [`NumericsTut
 
 To run the Julia code you will need [Julia](https://julialang.org/downloads/platform.html) installed on your machine and within Julia you will need the Plots, Random, and Printf [packages installed](https://docs.julialang.org/en/v1/stdlib/Pkg/index.html). If you want to run the Jupyter Notebook you will also need to have the [IJulia package](https://github.com/JuliaLang/IJulia.jl).
 
-To tweet the animations from the server.js script you will need a developer account and an application with keys you can populate to the `configSample.js` file. [This](https://www.makeuseof.com/tag/photo-tweeting-twitter-bot-raspberry-pi-nodejs/) is a helpful tutorial I loosely followed. You will need [Node.js](https://nodejs.org/en/download/) installed with the package [Twit](https://www.npmjs.com/package/twit) added.
+To tweet the animations from the server.js script you will need a developer account and an application with keys you can populate to the [`configSample.js`](twitterbot/configSample.js) file. [This](https://www.makeuseof.com/tag/photo-tweeting-twitter-bot-raspberry-pi-nodejs/) is a helpful tutorial I loosely followed. You will need [Node.js](https://nodejs.org/en/download/) installed with the package [Twit](https://www.npmjs.com/package/twit) added.
 
 To create the animation (either in Julia or manually) with this script you need to have [FFmpeg installed](https://ffmpeg.org/download.html).
 
