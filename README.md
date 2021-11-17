@@ -34,7 +34,7 @@ To tweet from a script you need a developer account with Twitter so that you can
 
 ***Overwhelmed by lots of instructions and want me to just do it for you?*** DM the bot a donation receipt showing you supported an org fighting for civil rights  (ie places like the [Equal Justice Initiative](https://eji.org/), [Human Rights Campaign](https://www.hrc.org/), [ACLU](https://www.aclu.org/), etc.)  and I will do the heavy lifting for you! I will happily make you a classic three-body version, a 3D three-body version, or you can request one of my new fancy new n-body simulations – you can even pick colors and name the stars!  Here's an example of a fun custom thing I recently put together in honor of the new Dune movie: 
 
-<img align="center" src="Dune/Dune.gif" width="380" height="380">
+<img align="center" src="Dune/Dune.gif" width="720" height="720">
 
 ***Now back to the details...***
 
