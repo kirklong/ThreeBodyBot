@@ -31,8 +31,10 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     end
     m=rand(1:1500,3)./10 #3 random masses between 0.1 and 150 solar masses, uniform distribution
     #m=getMass(3) #get mass from IMF -- this way is kind of boring...so not using it, but left here in case I change my mind?
+    #m=[15.5,7.3,13.1]
     rad=m.^0.8 #3 radii based on masses in solar units
     m=m.*2e30 #convert to SI kg
+
     rad=rad.*7e8 #convert to SI m
     pos1=rand(-25:25,2) #random initial coordinates x & y for first body, AU
     function genPos2(pos1)
@@ -61,7 +63,9 @@ function initCondGen() #get random initial conditions for mass/radius, position,
     end
     pos3=genPos3(pos1,pos2)
     pos=[pos1[1],pos1[2],pos2[1],pos2[2],pos3[1],pos3[2]].*1.5e11 #convert accepted positions to SI, m
+    #pos=[-12,2,13,1,-2,-25].*1.5e11
     v=rand(-7e3:7e3,6) #random x & y velocities with mag between -10 & 10 km/s, totally arbitrary...
+    #v=[2.922,-1.443,0.511,0.142,3.502,-1.255].*1e3
     #r=[x1,y1,x2,y2,x3,y3,v1x,v1y,v2x,v2y,v3x,v3y] -- format if you want to specify your own initial conditions
     r=[pos[1],pos[2],pos[3],pos[4],pos[5],pos[6],v[1],v[2],v[3],v[4],v[5],v[6]]
     open("initCond.txt","w") do f #save initial conditions to file in folder where script is run
@@ -161,17 +165,54 @@ function gen3Body(stopCond=[10,100],numSteps=10000) #default stop conditions of 
                     elseif sep23<min23
                         collisionInds=[2,3]
                     end
+                    stop = true
                 else
+                    G=6.67e-11
                     collisionBool=false
+                    if sep12>sepStop && sep13>sepStop #1 is "ejected"
+                        M = m[2] + m[3]
+                        cmx = (m[2]*r[3]+m[3]*r[5])/M
+                        cmy = (m[2]*r[4]+m[3]*r[6])/M
+                        dist = sqrt((r[1]-cmx)^2+(r[2]-cmy)^2)
+                        vEscape = sqrt(2*G*M/dist)
+                        currentV = sqrt(r[7]^2+r[8]^2)
+                        if currentV > vEscape
+                            stop = true
+                            println("1 ejected")
+                        end
+                    elseif sep23>sepStop && sep13>sepStop #3 is ejected
+                        M = m[2] + m[1]
+                        cmx = (m[2]*r[3]+m[1]*r[1])/M
+                        cmy = (m[2]*r[4]+m[1]*r[2])/M
+                        dist = sqrt((r[5]-cmx)^2+(r[6]-cmy)^2)
+                        vEscape = sqrt(2*G*M/dist)
+                        currentV = sqrt(r[11]^2+r[12]^2)
+                        if currentV > vEscape
+                            stop = true
+                            println("3 ejected")
+                        end
+                    elseif sep23>sepStop && sep12>sepStop #2 is ejected
+                        M = m[1] + m[3]
+                        cmx = (m[1]*r[1]+m[3]*r[5])/M
+                        cmy = (m[1]*r[2]+m[3]*r[6])/M
+                        dist = sqrt((r[3]-cmx)^2+(r[4]-cmy)^2)
+                        vEscape = sqrt(2*G*M/dist)
+                        currentV = sqrt(r[9]^2+r[10]^2)
+                        if currentV > vEscape
+                            stop = true
+                            println("2 ejected")
+                        end
+                    end
                 end
-                stop=true #stop if collision happens or body is ejected
-                t=range(0,stop=currentT,length=i) #t should match pos vectors
-                x1=x1[1:i] #don't want trailing zeros
-                y1=y1[1:i]
-                x2=x2[1:i]
-                y2=y2[1:i]
-                x3=x3[1:i]
-                y3=y3[1:i]
+                if stop==true #stop if collision happens or body is ejected
+                    t=range(0,stop=currentT,length=i) #t should match pos vectors
+                    x1=x1[1:i] #don't want trailing zeros
+                    y1=y1[1:i]
+                    x2=x2[1:i]
+                    y2=y2[1:i]
+                    x3=x3[1:i]
+                    y3=y3[1:i]
+                end
             end
             i+=1
             currentT+=stepSize #next step
@@ -188,7 +229,7 @@ function getInteresting3Body(minTime=0) #in years, defaults to 0
     i=1
     while interesting==false
         global energy=[] #re-initialize empty energy array
-        plotData,t,m,rad,collisionBool,collisionInds,initV=gen3Body([60,200],600000)
+        plotData,t,m,rad,collisionBool,collisionInds,initV=gen3Body([60,100],600000)
         if (maximum(t)/yearSec)>minTime #only return if simulation runs for longer than minTime
             println(maximum(t)/yearSec) #tell me how many years we are simulating
             open("cron_log.txt","a") do f #for cron logging, a flag = append
