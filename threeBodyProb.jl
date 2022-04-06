@@ -1,6 +1,25 @@
 #!/usr/bin/env julia
 using JSON, Printf, Plots, Plots.Measures, Dates
 
+#INSTRUCTIONS on using this code:
+# 1: check that you have a recent(ish, >1.0) version of Julia installed
+# 2: within Julia, make sure you have the required packages (above, in the "Using..." statement) installed (I think all but JSON comes by default?)
+# 3: make sure you have FFmpeg installed
+# 4: setup an empty sub-directory called "tmpPlots"
+# 5: go to the bottom of this file and uncomment the makeAnim() function call (remove the #)
+# 6: save this file
+# 7: run this file (double click it and tell it to run with Julia, open a terminal and type: julia threeBodyProb.jl, or start a julia session in the same directory as the file and type: include("threeBodyProb.jl") )
+# 8: have fun!!!
+
+# NOTE: if you've come here from the tutorial video, the script has changed significantly since that was made, but luckily the process is still the same!
+# to generate a random three-body animation with the same parameters as the bot would the process above still works, as do all the setup steps in the video.
+# if you want to specify your own initial conditions you'll have to poke around in the code and change some things in initCondGen -- i.e. have it return your hard-coded conditions instead of randomly generating them
+# in the future I'll add an interactive option that makes this clearer, but hopefully you can figure it out!
+# you can change the length of the animation, the max acceptable error, the gravitational constant, minimum time, etc. by changing the call to getData at the top of the main() function in the plotting section
+# i.e. to get a simulation with max duration of 120s you would change it from getData(3) to getData(3,maxTime=120). Full options and defaults documented at the top of getData function in the simulation section.
+# I'll eventually make a new video showing this better next time I have free time -- sorry for inconvenience
+# If you can't get it to work and want the file to match the video, download and use the LEGACYthreeBodyProb.jl file on the GitHub, as that file should be pretty much exactly the same as the one I used while making tutorial video!
+
 ############################## SIMULATION SECTION ###################################################
 
 function initCondGen(nBodies; vRange=[-7e3,7e3],posRange=[-35,35],tweet=nothing) #get random initial conditions for mass/radius, position, and velocity, option for user to specify acceptable vRange and posRange
@@ -940,3 +959,4 @@ function makeAnim(clean=true; tweet=nothing)
 end
 
 main()
+#makeAnim() #commented out because bot uses shell script to compile frames with music
