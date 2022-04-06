@@ -294,7 +294,7 @@ function getData(nBodies; totalETol = 1e-5, maxIter = 1000, maxTime=60,minYrs=15
                 tooBig = abs((Ef-Ei)/Ei) > EframeTol ? true : false #is our timestep too big?
                 if slowdown >= maxSlowdown/2 && nBodiesTmp < 3
                     open("cron_log.txt","a") do f #for cron logging, a flag = append
-                        write(f,"$(T[end]/yearSec)\n")
+                        write(f,"$(T[i-1]/yearSec)\n")
                     end
                     open("3BodyStats.txt","a") do f #for stats logging
                         initPos=[coordsRecord[1][1][1],coordsRecord[1][2][1],coordsRecord[1][1][2],coordsRecord[1][2][2],coordsRecord[1][1][3],coordsRecord[1][2][3]]./1.5e11 #AU
