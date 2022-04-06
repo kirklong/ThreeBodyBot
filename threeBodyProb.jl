@@ -77,7 +77,7 @@ function initCondGen(nBodies; vRange=[-7e3,7e3],posRange=[-35,35],tweet=nothing)
     end
 end
 
-function Δr(coords,masses,nBodies,G) #this is a generalized version of what we had before for nBodies, different masses, and different values of G
+function Δr(coords,masses,nBodies,G) #function we will use RK4 on to approximate solution
     x,y,vx,vy = deepcopy(coords) #in Julia saying a = b just sets pointers by default, this creates a physical copy in memory
     Δ = deepcopy(coords)
     for n=1:nBodies
@@ -611,10 +611,10 @@ function main(tweet=nothing) #pulls everything together, only works for 3 body c
     x = [coordsRecord[i][1] for i=1:length(coordsRecord)]; y = [coordsRecord[i][2] for i=1:length(coordsRecord)]
     minBox = 0.; maxBox = 0.
     for coords in coordsRecord
-        if maximum([maximum(coords[1]),maximum(coords[2])]) > maxBox
+        if maximum([maximum(coords[1]),maximum(coords[2])])/1.5e11 > maxBox
             maxBox = maximum([maximum(coords[1]),maximum(coords[2])])/1.5e11
         end
-        if minimum([minimum(coords[1]),minimum(coords[2])]) < minBox
+        if minimum([minimum(coords[1]),minimum(coords[2])])/1.5e11 < minBox
             minBox = minimum([minimum(coords[1]),minimum(coords[2])])/1.5e11
         end
     end
