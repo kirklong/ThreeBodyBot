@@ -13,8 +13,7 @@ using JSON, Printf, Plots, Plots.Measures, Dates
 
 # NOTE: if you've come here from the tutorial video, the script has changed significantly since that was made, but luckily the process is still the same!
 # to generate a random three-body animation with the same parameters as the bot would the process above still works, as do all the setup steps in the video.
-# if you want to specify your own initial conditions you'll have to poke around in the code and change some things in initCondGen -- i.e. have it return your hard-coded conditions instead of randomly generating them
-# in the future I'll add an interactive option that makes this clearer, but hopefully you can figure it out!
+# if you want to specify your own initial conditions you just have to call main(custom=true) and it will query you for the initial conditions for three bodies!
 # you can change the length of the animation, the max acceptable error, the gravitational constant, minimum time, etc. by changing the call to getData at the top of the main() function in the plotting section
 # i.e. to get a simulation with max duration of 120s you would change it from getData(3) to getData(3,maxTime=120). Full options and defaults documented at the top of getData function in the simulation section.
 # I'll eventually make a new video showing this better next time I have free time -- sorry for inconvenience
@@ -273,7 +272,70 @@ function getData(nBodies; totalETol = 1e-5, maxIter = 1000, maxTime=60,minYrs=15
             end
         else
             interesting = true
-            continue #to be implemented, pass in m and init coords
+            m = zeros(nBodies); x = zeros(nBodies); y = zeros(nBodies); vx = zeros(nBodies); vy = zeros(nBodies)
+            for n = 1:nBodies
+                accept = false
+                while accept == false
+                    println("Enter value for m$n (solar masses): ")
+                    input = readline()
+                    try
+                        m[n] = parse(Float64,input)
+                        accept = true
+                    catch
+                        println("Error: could not parse number from input\n")
+                    end
+                end
+                accept = false
+                while accept == false
+                    println("Enter value for x$n (AU from center): ")
+                    input = readline()
+                    try
+                        x[n] = parse(Float64,input)
+                        accept = true
+                    catch
+                        println("Error: could not parse number from input\n")
+                    end
+                end
+                accept = false
+                while accept == false
+                    println("Enter value for y$n (AU from center): ")
+                    input = readline()
+                    try
+                        y[n] = parse(Float64,input)
+                        accept = true
+                    catch
+                        println("Error: could not parse number from input\n")
+                    end
+                end
+                accept = false
+                while accept == false
+                    println("Enter value for vx$n (km/s): ")
+                    input = readline()
+                    try
+                        vx[n] = parse(Float64,input)
+                        accept = true
+                    catch
+                        println("Error: could not parse number from input\n")
+                    end
+                end
+                accept = false
+                while accept == false
+                    println("Enter value for vy$n (km/s): ")
+                    input = readline()
+                    try
+                        vy[n] = parse(Float64,input)
+                        accept = true
+                    catch
+                        println("Error: could not parse number from input\n")
+                    end
+                end
+            end
+            coords = [x.*1.5e11,y.*1.5e11,vx.*1e3,vy.*1e3]
+            coordsRecord[1] = deepcopy(coords)
+            rad = m.^0.8
+            rad = rad.*7e8
+            m = m.*2e30
+            mStart, radStart, nBodiesStart = deepcopy(m), deepcopy(rad), deepcopy(nBodies)
         end
     end
 
@@ -610,9 +672,9 @@ function makeCircleVals(r,center=[0,0]) #makes circle values for the stars to pl
     return xVals,yVals
 end
 
-function main(tweet=nothing) #pulls everything together, only works for 3 body case (for now...)
+function main(;tweet=nothing,custom=false) #pulls everything together, only works for 3 body case (for now...)
     println("sit tight -- finding an interesting solution")
-    coordsRecord, m, rad, nBodies, t, err, collisionBool, collisionInds, escape, escapeInd, speedRecord = getData(3,tweet=tweet) #find an interesting solution at least 15 years
+    coordsRecord, m, rad, nBodies, t, err, collisionBool, collisionInds, escape, escapeInd, speedRecord = getData(3,tweet=tweet,custom=custom) #find an interesting solution at least 15 years
     m = m[1]; rad = rad[1]; nBodies = nBodies[1] #each of these vars before this are tuples going like (startVal, endVal) and we want the starting ones
     plotData = convertData(coordsRecord,t)
 
@@ -958,5 +1020,6 @@ function makeAnim(clean=true; tweet=nothing)
     end
 end
 
-main()
+#main()
+#main(custom=true) # if you want to specify initial conditions
 #makeAnim() #commented out because bot uses shell script to compile frames with music
