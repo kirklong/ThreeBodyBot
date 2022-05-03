@@ -31,7 +31,7 @@ function initCondGen(nBodies; vRange=[-7e3,7e3],posRange=[-35,35],tweet=nothing)
         minPos,maxPos=posRange[1],posRange[2] #defaults to pos within 70 AU box
         posList=[]
         function checkPos(randPos,n,posList,rad) #this function checks if positions are too close to each other
-            for i=2:(n-1)
+            for i=1:(n-1)
                 dist=sqrt((posList[i][1]-randPos[1])^2+(posList[i][2]-randPos[2])^2)
                 if (dist*1.5e11)<(rad[n]+rad[i])
                     return false
@@ -672,9 +672,9 @@ function makeCircleVals(r,center=[0,0]) #makes circle values for the stars to pl
     return xVals,yVals
 end
 
-function main(;tweet=nothing,custom=false) #pulls everything together, only works for 3 body case (for now...)
+function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everything together, only works for 3 body case (for now...)
     println("sit tight -- finding an interesting solution")
-    coordsRecord, m, rad, nBodies, t, err, collisionBool, collisionInds, escape, escapeInd, speedRecord = getData(3,tweet=tweet,custom=custom) #find an interesting solution at least 15 years
+    coordsRecord, m, rad, nBodies, t, err, collisionBool, collisionInds, escape, escapeInd, speedRecord = getData(3,tweet=tweet,custom=custom,maxTime=maxTime,minYrs=minYrs) #find an interesting solution at least 15 years
     m = m[1]; rad = rad[1]; nBodies = nBodies[1] #each of these vars before this are tuples going like (startVal, endVal) and we want the starting ones
     plotData = convertData(coordsRecord,t)
 
@@ -1020,6 +1020,6 @@ function makeAnim(clean=true; tweet=nothing)
     end
 end
 
-#main()
+main()
 #main(custom=true) # if you want to specify initial conditions
 #makeAnim() #commented out because bot uses shell script to compile frames with music
