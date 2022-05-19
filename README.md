@@ -5,6 +5,7 @@
 A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
  <br clear="left"/>
 </p>
+
 ### What people are saying about @ThreeBodyBot:
 
 "I'm Jessie Christiansen and I stan the Random Three Body Problem twitter account." – [Dr. Jessie Christiansen](https://twitter.com/aussiastronomer/status/1263121973082681347)
