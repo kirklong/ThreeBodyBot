@@ -23,7 +23,7 @@ This is a fun little pet project I put together in Julia that renders a random g
 ### A lazy n-body generator...
 There are several scripts in the [`nbody`](nbody) folder worth looking at if you are looking to create even more gravitational chaos. These will start occasionally popping up on the bot's Twitter (currently a 1 in 10 chance each day), and there are new instructions below that should get you started if you want to try to make one of these yourself! The camera implementation with these is still a little buggy though...so if you have great ideas on what should be done to improve it please do so and I will happily credit and merge your changes. I think I can apply the improved camera system from the three-body versions here, but I need to actually sit down and spend a day doing it...
 
-Both versions of the simulation use Newtonian gravity only to simulate the system, i.e. each $i$th body's motion is governed simply by:
+Both versions of the simulation use Newtonian gravity only to simulate the system, i.e. $i$ body's motion is governed simply by:
 
 $$a_i = \frac{\mathrm{d}^2\mathbf{r_i}}{\mathrm{d}t^2} = \sum_{j\neq i} -GM_{j}\frac{\mathbf{r_i - r_j}}{r_{ij}^3}$$
 
