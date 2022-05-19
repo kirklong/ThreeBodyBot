@@ -1,5 +1,5 @@
 # Random Three-Body Simulation Generator (***with Twitter bot***)
-<p> <img align="left" src="figure8.gif" width="200" height="200" style="float: left;"/>A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!<br clear="left"/></p>
+<p> <img align="left" src="figure8.gif" width="200" height="200" style="float: left;"/>A cool stable solution to the three-body problem created by the code, based off of <a href="https://arxiv.org/pdf/math/0011268.pdf">Chenciner and Montgomery (2000)</a>. See all the animations on the bot's <a href="https://twitter.com/ThreeBodyBot">Twitter</a><br clear="left"/></p>
 
 ### What people are saying about @ThreeBodyBot:
 
