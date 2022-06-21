@@ -749,6 +749,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
                 end
             end
         end
+
         GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
         gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
         print("$(@sprintf("%.2f",i/length(t)*100)) % complete\r") #output percent tracker
@@ -789,10 +790,11 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
         dx,dy=getRatioRight(ratio,dx,dy) #check again
         limx = [center[1]-dx/2,center[1]+dx/2]; limy = [center[2]-dy/2,center[2]+dy/2]
         push!(limList,[limx,limy]) #record limits for later use, push! is bad and we should just preallocate this but whatever
+        starDensity = round(Int,speedRecord[i])
         p=plot(plotData[1][1:skipPts:i]./1.5e11,plotData[2][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[1],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
         p=plot!(plotData[3][1:skipPts:i]./1.5e11,plotData[4][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[2],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
         p=plot!(plotData[5][1:skipPts:i]./1.5e11,plotData[6][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[3],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-        p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+        p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],markercolor=:white,markersize=:1,label="") #fake background stars, thin when zoomed out
         star1=makeCircleVals(rad[1],[plotData[1][i],plotData[2][i]]) #generate circles with appropriate sizes for each star
         star2=makeCircleVals(rad[2],[plotData[3][i],plotData[4][i]]) #at current positions
         star3=makeCircleVals(rad[3],[plotData[5][i],plotData[6][i]])
@@ -959,7 +961,8 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #plot orbits up to i
             p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #linealpha argument causes lines to decay
             p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-            p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+            starDensity = round(Int,speedRecord[end])
+            p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],markercolor=:white,markersize=:1,label="") #fake background stars
             star1=makeCircleVals(rad[1],[plotData[1][end],plotData[2][end]]) #generate circles with appropriate sizes for each star
             star2=makeCircleVals(rad[2],[plotData[3][end],plotData[4][end]]) #at current positions
             star3=makeCircleVals(rad[3],[plotData[5][end],plotData[6][end]])
