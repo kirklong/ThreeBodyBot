@@ -15,7 +15,7 @@ if [ -f $oldAnim ] ; then
     #remove all mp4 videos, not just oldAnim (with adding music others are created)
 fi
 LOGFILE="/home/kirk/Documents/3Body/jCronErr.log"
-nBody=$((1+RANDOM%10)) #1 and 7 chance of doing nBody simulation
+nBody=0 #$((1+RANDOM%10)) #1 in 10 chance of doing nBody simulation, disabled for now
 if [ $nBody -eq 1 ]; then
   echo 'n-body simulation!' >> /home/kirk/Documents/3Body/cron_log.txt
   nBodies=$((4+RANDOM%6)) #20 is a lot, and I think close to the limit of what fits in tweet
@@ -104,6 +104,15 @@ combinedFile="3Body_fps30_wMusic.mp4"
 combinedAACOut="3Body_fps30_wMusicAAC.mp4"
 ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine audio w/video
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
+
+echo 'attempting to upload to all platforms\n' >> /home/kirk/Documents/3Body/cron_log.txt
 cd twitterbot
-./server.js
+./server.js >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+cd ../tumblrBot
+./bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+cd ../YouTubeBot
+./opplastUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+cd ../MastodonBot
+./MastodonUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt
