@@ -3,7 +3,7 @@
 <!-- <img align="left" src="figure8.gif" width="380" height="380"> -->
 ![Figure 8 solution](figure8.gif)
 
-A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot)!
+A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot), [Tumblr](https://www.tumblr.com/threebodybot), [YouTube](https://www.youtube.com/@ThreeBodyBot), or [Mastodon](https://botsin.space/web/@ThreeBodyBot)!
 
 ### What people are saying about @ThreeBodyBot:
 
@@ -22,7 +22,7 @@ This is a fun little pet project I put together in Julia that renders a random g
 
 
 ### A lazy n-body generator...
-There are several scripts in the [`nbody`](nbody) folder worth looking at if you are looking to create even more gravitational chaos. These will start occasionally popping up on the bot's Twitter (currently a 1 in 10 chance each day), and there are new instructions below that should get you started if you want to try to make one of these yourself! The camera implementation with these is still a little buggy though...so if you have great ideas on what should be done to improve it please do so and I will happily credit and merge your changes. I think I can apply the improved camera system from the three-body versions here, but I need to actually sit down and spend a day doing it...
+There are several scripts in the [`nbody`](nbody) folder worth looking at if you are looking to create even more gravitational chaos. These will start occasionally popping up on the bot's accounts, and there are new instructions below that should get you started if you want to try to make one of these yourself! The camera implementation with these is still a little buggy though...so I've currently disabled them until I get around to fixing that. If you have great ideas on what should be done to improve it please do so and I will happily credit and merge your changes. I think I can apply the improved camera system from the three-body versions here, but I need to actually sit down and spend a day doing it...
 
 ### The math / procedural details
 The simulations use Newtonian gravity only to simulate the system, i.e. each body's motion is governed simply by:
@@ -31,13 +31,13 @@ $$\mathbf{a_i} = \ddot{\mathbf{r_i}} = \sum_{j\neq i} -GM_{j}\frac{\mathbf{r_i -
 
 Where the body at index $i$ is the body being moved and $j \neq i$ the bodies that $i$ is attracted towards, with $i$ running from 1 to the total number of bodies (i.e. in the three-body case $i$ runs from 1 to 3). $G$ is Newton's gravitational constant, $M$ is the mass, and $\mathbf{r}$ the position vector (with $r_{ij}$ corresponding to the distance between two bodies $i$ and $j$). This second-order differential equation is split into two coupled first-order differential equations ($\dot{\mathbf{r}} = \mathbf{v}$ and $\dot{\mathbf{v}} = \mathbf{a}$) and integrated with an adaptive time stepping 4th order Runge-Kutta procedure ensuring that the total error of each simulation is <0.001% (measured from change in total energy of the system). The equations are integrated in 2D cartesian space (2D looks cleaner in visualizations and makes collisions more frequent, which is fun), although simple 3D versions of the code are hosted here as well if you're interested. For a more in-depth walk-through / analysis see the materials in the [`NumericsTutorial`](NumericsTutorial) folder, which includes a nice tutorial on how to build your own n-body simulator from scratch!
 
-### The Twitter/Tumblr/YouTube/Mastodon bot
+### The /Tumblr/YouTube/Mastodon bot
 For *Twitter*:
 This is my first experience with JavaScript and the Twitter API, so it's mostly cobbled together code from the Twit [documentation](https://www.npmjs.com/package/twit), this auto-tweeting image bot [code](https://github.com/fourtonfish/random-image-twitterbot/blob/master/server-attribution.js), and this video tweeting example from [Loren Stewart](https://lorenstewart.me/2017/02/03/twitter-api-uploading-videos-using-node-js/).
 
 It's a really basic program but it works (mostly anyways).
 
-To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)).
+To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)). The script the bot uses to upload to Twitter is at [`server.js`](twitterbot/server.js).
 
 For *Tumblr*:
 I used the great [pytumblr](https://github.com/tumblr/pytumblr) module (and accompanying documentation there) to upload the simulations to a [tumblr blog](https://www.tumblr.com/threebodybot). You need to register your application to get authentication keys to be able to post but the process is pretty easy with Tubmlr! The script that does the uploading is [`bot.py`](tumblrBot/bot.py).
@@ -46,7 +46,7 @@ For *YouTube*:
 This was the trickiest one... YouTube has a great and easy API to use like Tumblr, but they don't let you publish the videos you upload via their API to the public unless you "verify" your app, which requires a lot of red tape. Part of that verification process is showing how your app works and that it will be used by > 100 people...and on these grounds they denied verifying my app, so I had to get a little crafty. Ended up using this wonderful [Opplast](https://github.com/offish/opplast) repo and instructions therein to accomplish this, but the way this works is significantly less stable over time than if YouTube would just let me use their API to upload, so if you're reading this and you work at YouTube (or know someone who does) and want to help me verify my app please reach out! The script that does the uploading to YouTube is [`opplastUpload.py`](YouTubeBot/opplastUpload.py) and you can find the bot's YouTube channel [here](https://www.youtube.com/channel/UCB6dRXvYWpOqEA3oHUS6xYA).
 
 For *Mastodon*:
-Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://github.com/halcy/Mastodon.py)) that I use to upload the videos to the [bot's Mastodon account](https://botsin.space/web/@ThreeBodyBot). Again you need to register your application to get authentication keys but like Tubmlr it's pretty painless! With Mastodon you also have to make sure the server allows bots, which is why I chose to host the bot on [bots.inspace](https://bots.inspace).
+Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://github.com/halcy/Mastodon.py)) that I use to upload the videos to the [bot's Mastodon account](https://botsin.space/web/@ThreeBodyBot). Again you need to register your application to get authentication keys but like Tubmlr it's pretty painless! With Mastodon you also have to make sure the server allows bots, which is why I chose to host the bot on [bots.inspace](https://bots.inspace). The script that takes care of uploading the videos to Mastodon is [`MastodonUpload.py`](MastodonBot/MastodonUpload.py).
 
 ## Want to generate your own animations?
 
@@ -66,7 +66,7 @@ If you don't have FFmpeg installed you could try using Julia's built-in animatio
 
 The [`3BodySetup.ipynb`](3BodySetup.ipynb) notebook is more of the stream of consciousness I had while creating this project and testing different things, but it may be useful if you want to see how things are tweaked (but it's not very well documented sorry).
 
-The shell script ([`3BodyShell.sh`](3BodyShell.sh)) depends almost entirely on filepaths to my machine and requires use of the Twitter API through the [`server.js`](twitterbot/server.js) script but is a good template to base your own off of (if you desire), and the FFmpeg command there by itself may be useful. It's also fun if you just want to see the entire pipeline for how the animations get generated and posted start to finish.
+The shell script ([`3BodyShell.sh`](3BodyShell.sh)) depends almost entirely on filepaths to my machine and requires use of the Twitter/Tumblr/YouTube/Mastodon APIs through their respective upload scripts but is a good template to base your own off of (if you desire), and the FFmpeg command there by itself may be useful. It's also fun if you just want to see the entire pipeline for how the animations get generated and posted start to finish.
 
 **If you want to make n-body simulations**, you need either the [`requests.jl`](nbody/requests.jl) or [`namedBody.jl`](nbody/namedBody.jl) code from the `nbody` folder – use the [`namedBody.jl`](nbody/namedBody.jl) version if you want to give the stars actual names (as opposed to just masses) and the [`requests.jl`](nbody/requests.jl) version for everything else. Yes, reader, I could (and probably should) have combined these into one file but I'm exceptionally lazy and for some reason thought it was easier to make two when I did it late the other night so sorry. Both of these scripts have command line arguments that change interactivity. For example, to generate square frames for a 10 body simulation with random masses, colors, and without fun names one would execute something like `julia requests.jl 10 0 0 0`. Like in the three-body code you will need to alter the filepath to where the frames are saved, and use something like FFmpeg to compile the frames after they are generated.
 
@@ -110,6 +110,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 * [FFmpeg](https://ffmpeg.org/) – to render the animations and integrate audio files.
 * [Node.js](https://nodejs.org/en/) – to post the animations to Twitter (with the help of [twit](https://www.npmjs.com/package/twit)).
 * [Bash](https://www.gnu.org/software/bash/) – to pull all scripts together and manage the resulting files.
+* [python](https://python.org) - to post the animations to Tumblr, YouTube, and Mastodon (with the help of [pytumblr](https://github.com/tumblr/pytumblr), [opplast](https://github.com/offish/opplast), and [Mastodon.py](https://github.com/halcy/Mastodon.py))
 
 
 ## Author
