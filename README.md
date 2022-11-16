@@ -1,4 +1,4 @@
-# Random Three-Body Simulation Generator (***with Twitter bot***)
+# Random Three-Body Simulation Generator (***with Twitter/Tumblr/YouTube/Mastodon bot***)
 
 <!-- <img align="left" src="figure8.gif" width="380" height="380"> -->
 ![Figure 8 solution](figure8.gif)
@@ -31,12 +31,22 @@ $$\mathbf{a_i} = \ddot{\mathbf{r_i}} = \sum_{j\neq i} -GM_{j}\frac{\mathbf{r_i -
 
 Where the body at index $i$ is the body being moved and $j \neq i$ the bodies that $i$ is attracted towards, with $i$ running from 1 to the total number of bodies (i.e. in the three-body case $i$ runs from 1 to 3). $G$ is Newton's gravitational constant, $M$ is the mass, and $\mathbf{r}$ the position vector (with $r_{ij}$ corresponding to the distance between two bodies $i$ and $j$). This second-order differential equation is split into two coupled first-order differential equations ($\dot{\mathbf{r}} = \mathbf{v}$ and $\dot{\mathbf{v}} = \mathbf{a}$) and integrated with an adaptive time stepping 4th order Runge-Kutta procedure ensuring that the total error of each simulation is <0.001% (measured from change in total energy of the system). The equations are integrated in 2D cartesian space (2D looks cleaner in visualizations and makes collisions more frequent, which is fun), although simple 3D versions of the code are hosted here as well if you're interested. For a more in-depth walk-through / analysis see the materials in the [`NumericsTutorial`](NumericsTutorial) folder, which includes a nice tutorial on how to build your own n-body simulator from scratch!
 
-### The Twitter bot
+### The Twitter/Tumblr/YouTube/Mastodon bot
+For *Twitter*:
 This is my first experience with JavaScript and the Twitter API, so it's mostly cobbled together code from the Twit [documentation](https://www.npmjs.com/package/twit), this auto-tweeting image bot [code](https://github.com/fourtonfish/random-image-twitterbot/blob/master/server-attribution.js), and this video tweeting example from [Loren Stewart](https://lorenstewart.me/2017/02/03/twitter-api-uploading-videos-using-node-js/).
 
 It's a really basic program but it works (mostly anyways).
 
 To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)).
+
+For *Tumblr*:
+I used the great [pytumblr](https://github.com/tumblr/pytumblr) module (and accompanying documentation there) to upload the simulations to a [tumblr blog](https://www.tumblr.com/threebodybot). You need to register your application to get authentication keys to be able to post but the process is pretty easy with Tubmlr! The script that does the uploading is [`bot.py`](tumblrBot/bot.py).
+
+For *YouTube*:
+This was the trickiest one... YouTube has a great and easy API to use like Tumblr, but they don't let you publish the videos you upload via their API to the public unless you "verify" your app, which requires a lot of red tape. Part of that verification process is showing how your app works and that it will be used by > 100 people...and on these grounds they denied verifying my app, so I had to get a little crafty. Ended up using this wonderful [Opplast](https://github.com/offish/opplast) repo and instructions therein to accomplish this, but the way this works is significantly less stable over time than if YouTube would just let me use their API to upload, so if you're reading this and you work at YouTube (or know someone who does) and want to help me verify my app please reach out! The script that does the uploading to YouTube is [`opplastUpload.py`](YouTubeBot/opplastUpload.py) and you can find the bot's YouTube channel [here](https://www.youtube.com/channel/UCB6dRXvYWpOqEA3oHUS6xYA).
+
+For *Mastodon*:
+Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://github.com/halcy/Mastodon.py)) that I use to upload the videos to the [bot's Mastodon account](https://botsin.space/web/@ThreeBodyBot). Again you need to register your application to get authentication keys but like Tubmlr it's pretty painless! With Mastodon you also have to make sure the server allows bots, which is why I chose to host the bot on [bots.inspace](https://bots.inspace).
 
 ## Want to generate your own animations?
 
