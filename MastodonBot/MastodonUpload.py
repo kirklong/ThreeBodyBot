@@ -12,12 +12,12 @@ description = "Initial conditions:\n" + initCond
 
 media = m.media_update(media['id'])
 attempts = 0
-while media['url'] == None and attempts < 10:
-    time.sleep(3)
+while media['url'] == None and attempts < 12:
+    time.sleep(5)
     media = m.media_update(media['id'])
     attempts += 1
 
-if attempts < 10: 
+if attempts < 12: 
     m.status_post(description,media_ids=[media['id']],visibility='public')
     print("posted to Mastodon!")
 else:
