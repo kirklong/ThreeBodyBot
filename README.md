@@ -54,6 +54,8 @@ Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://githu
 
 ![Dune.gif](Dune/Dune.gif)
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1w-NeVdZp-AT4gO7A2aOvBaJbHdupy2y0?usp=sharing)
+
 ***Now back to the details...***
 
 If you're on Windows, there's now a 15 minute [tutorial video](https://www.youtube.com/watch?v=bXrXwgC9Ltk&feature=youtu.be) that walks you through the entire process, from installing Julia to making your first animation! If there's interest I will also make one demonstrating the process on Linux, but I'm assuming most people who are running Linux won't need/want a tutorial. Unfortunately I don't have access to a Mac, so can't make one for macOS. Hopefully between the Windows video and the instructions below you can sort it out, sorry!
