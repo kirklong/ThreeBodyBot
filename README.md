@@ -54,11 +54,12 @@ Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://githu
 
 ![Dune.gif](Dune/Dune.gif)
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1w-NeVdZp-AT4gO7A2aOvBaJbHdupy2y0?usp=sharing)
-
 ***Now back to the details...***
 
-If you're on Windows, there's now a 15 minute [tutorial video](https://www.youtube.com/watch?v=bXrXwgC9Ltk&feature=youtu.be) that walks you through the entire process, from installing Julia to making your first animation! If there's interest I will also make one demonstrating the process on Linux, but I'm assuming most people who are running Linux won't need/want a tutorial. Unfortunately I don't have access to a Mac, so can't make one for macOS. Hopefully between the Windows video and the instructions below you can sort it out, sorry!
+If you're on Windows, there's now a 15 minute [tutorial video](https://www.youtube.com/watch?v=bXrXwgC9Ltk&feature=youtu.be) that walks you through the entire process, from installing Julia to making your first animation! If there's interest I will also make one demonstrating the process on Linux, but I'm assuming most people who are running Linux won't need/want a tutorial. Unfortunately I don't have access to a Mac, so can't make one for macOS. Hopefully between the Windows video and the instructions below you can sort it out, sorry! 
+
+Don't want to download anything / tinker with your own computer? One of my students [Navan Chauhan](https://github.com/navanchauhan) recently deployed the bot on Google Colab, and you can play with it here if you like: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1w-NeVdZp-AT4gO7A2aOvBaJbHdupy2y0?usp=sharing)
+Note that Colab by default doesn't work with Julia, so each time you run the notebook you have to install Julia which takes a few minutes and can sometimes be a little buggy. 
 
 To make the classic three-body animations with this code all you really need to download (in addition to Julia) is the [`threeBodyProb.jl`](threeBodyProb.jl) script. There are comments there that hopefully explain how to use it and change the options so that you can start generating your own interesting systems! If you want to specify initial conditions (instead of having them be randomly generated) this script should be easy to modify to accomplish that goal. There are also a few other versions of the three-body problem script that are a bit less polished, including a full 3D version [`threeBody3D.jl`](threeBody3D.jl) and a three-paneled 3D version ([`threeBody3Panel.jl`](threeBody3Frame.jl).
 
@@ -133,6 +134,8 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 * Thanks to [Tasos Papastylianou](https://stackoverflow.com/users/4183191/tasos-papastylianou) for his help in [debugging](https://stackoverflow.com/questions/59515953/julia-program-stalls-when-run-from-crontab-scheduler-linux?noredirect=1#comment105234026_59515953) a very tricky error when my program was not running correctly initially when scheduled with cron.
 
 * Thanks to my research advisor Dr. Daryl Macomb for not answering my questions right away, giving me the free time over winter break to initially create this bot.
+
+* Thanks to my ASTR 2030 Black Holes student Navan Chauhan for deploying the bot to Colab!
 
 * Musical selections that accompany animations:
 
