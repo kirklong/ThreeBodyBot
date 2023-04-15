@@ -805,7 +805,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white) #formatting for plot frame
         title = t[i]/365/24/3600 < 100 ? "Random Three-Body Problem\nt:      years after start" : "Random Three-Body Problem\nt:       years after start"
         p=plot!(xlabel="x: AU",ylabel="y: AU",title=title,
-            legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),tickfontcolor=:white,
+            legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),tickfontcolor=:white,
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
 
         tX,tY=relative(p[1],0.295,1.041)#static coords for time relative to parent
@@ -851,7 +851,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
                 background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,fontfamily=:Courier) #formatting for plot frame
             p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end-(sloInd-i)]/365/24/3600)) years after start",
-                legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
+                legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
                 grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
             #collision cam zoom in
             i1,i2=collisionInds #these are the ones that are colliding, we use them to set the frame limits
@@ -911,7 +911,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
                 background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,fontfamily=:Courier) #formatting for plot frame
             p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end]/365/24/3600)) years after start",
-                legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
+                legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
                 grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
             #collision cam zoom in
             i1,i2=collisionInds #these are the ones that are colliding, we use them to set the frame limits
@@ -972,7 +972,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
                 background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,fontfamily=:Courier) #formatting for plot frame
             p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end]/365/24/3600)) years after start",
-                legend=:best,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
+                legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
                 grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
 
             sX,sY = relative(p[1],1/6,19/20)
