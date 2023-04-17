@@ -701,7 +701,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
     end
     maxBox = round(Int,maxBox); minBox = round(Int,minBox)
     boxSize = (maxBox-minBox)
-    numStars=round(Int,(2500/400^2)*(boxSize+100)^2)
+    numStars=round(Int,(1000/400^2)*(boxSize+100)^2)
     starsX=zeros(numStars)
     starsY=zeros(numStars)
     for i=1:numStars
@@ -791,10 +791,20 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
         limx = [center[1]-dx/2,center[1]+dx/2]; limy = [center[2]-dy/2,center[2]+dy/2]
         push!(limList,[limx,limy]) #record limits for later use, push! is bad and we should just preallocate this but whatever
         starDensity = round(Int,speedRecord[i])
-        p=plot(plotData[1][1:skipPts:i]./1.5e11,plotData[2][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[1],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #plot orbits up to i
-        p=plot!(plotData[3][1:skipPts:i]./1.5e11,plotData[4][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[2],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #linealpha argument causes lines to decay
-        p=plot!(plotData[5][1:skipPts:i]./1.5e11,plotData[6][1:skipPts:i]./1.5e11,label="",linewidth=2,linecolor=colors[3],linealpha=max.((1:skipPts:i) .+ 10000 .- i,2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-        p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],markercolor=:white,markersize=:1,label="") #fake background stars, thin when zoomed out
+        linealpha=max.((1:skipPts:i) .+ 10000 .- i,1000)./10000
+        if skipPts < 33
+            mask = ((1:skipPts:i) .% 33) .!= 0
+            linealpha[mask] ./= (33/skipPts)
+            # for j=1:skipPts:i
+            #     if j%33 != 0 && j<i
+            #         linealpha[Int(1+(j-1)/skipPts)] /= (33/skipPts) #prevent overdensity of points making line artificially bright
+            #     end
+            # end
+        end
+        p=plot(plotData[1][1:skipPts:i]./1.5e11,plotData[2][1:skipPts:i]./1.5e11,label="",linewidth=1.5,linecolor=colors[1],linealpha=linealpha) #plot orbits up to i
+        p=plot!(plotData[3][1:skipPts:i]./1.5e11,plotData[4][1:skipPts:i]./1.5e11,label="",linewidth=1.5,linecolor=colors[2],linealpha=linealpha) #linealpha argument causes lines to decay
+        p=plot!(plotData[5][1:skipPts:i]./1.5e11,plotData[6][1:skipPts:i]./1.5e11,label="",linewidth=1.5,linecolor=colors[3],linealpha=linealpha) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+        p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],marker=:circle,markerstrokewidth=0.,markercolor=:white,markersize=1,label="") #fake background stars, thin when zoomed out
         star1=makeCircleVals(rad[1],[plotData[1][i],plotData[2][i]]) #generate circles with appropriate sizes for each star
         star2=makeCircleVals(rad[2],[plotData[3][i],plotData[4][i]]) #at current positions
         star3=makeCircleVals(rad[3],[plotData[5][i],plotData[6][i]])
@@ -808,7 +818,7 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),tickfontcolor=:white,
             grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
 
-        tX,tY=relative(p[1],0.295,1.041)#static coords for time relative to parent
+        tX,tY=relative(p[1],0.295,1.036)#static coords for time relative to parent
         p = annotate!(tX,tY,Plots.text((@sprintf("%0.2f",t[i]/365/24/3600)),"Courier",14,"black"))
         sX,sY = relative(p[1],1/8,19/20)
         if speedRecord[i] != 1.
@@ -838,10 +848,10 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             pos=[plotData[1][end-(sloInd-i)],plotData[2][end-(sloInd-i)],plotData[3][end-(sloInd-i)],plotData[4][end-(sloInd-i)],plotData[5][end-(sloInd-i)],plotData[6][end-(sloInd-i)]] #current pos
             posFuture=pos #don't need future position at end
             limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
-            p=plot(plotData[1][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[2][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000) #plot orbits up to i
-            p=plot!(plotData[3][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[4][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000) #linealpha argument causes lines to decay
-            p=plot!(plotData[5][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[6][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-            p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+            p=plot(plotData[1][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[2][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)./10000) #plot orbits up to i
+            p=plot!(plotData[3][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[4][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)./10000) #linealpha argument causes lines to decay
+            p=plot!(plotData[5][1:skipPts:end-(sloInd-i)]./1.5e11,plotData[6][1:skipPts:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:skipPts:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)./10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+            p=scatter!(starsX,starsY,marker=:circle,markerstrokewidth=0.,markercolor=:white,markersize=1,label="") #fake background stars
             star1=makeCircleVals(rad[1],[plotData[1][end-(sloInd-i)],plotData[2][end-(sloInd-i)]]) #generate circles with appropriate sizes for each star
             star2=makeCircleVals(rad[2],[plotData[3][end-(sloInd-i)],plotData[4][end-(sloInd-i)]]) #at current positions
             star3=makeCircleVals(rad[3],[plotData[5][end-(sloInd-i)],plotData[6][end-(sloInd-i)]])
@@ -878,13 +888,13 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
                     xlims=(minX,minX+dF+1),ylims=(minY,minY+dF+1),legend=:false,left_margin=0mm,right_margin=0mm,top_margin=0mm,bottom_margin=0mm,
                     foreground_color_border=:white,foreground_color_axis=:white,foreground_color_text=:white,grid=:false,
                     aspect_ratio=:equal,fontfamily=:Courier,subplot=2,framestyle=:box,titlefontsize=10,tickfontsize=6)
-            p=plot!(p[2],plotData[1][1:10:end-(sloInd-i)]./1.5e11,plotData[2][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000)
-            p=plot!(p[2],plotData[3][1:10:end-(sloInd-i)]./1.5e11,plotData[4][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000)
-            p=plot!(p[2],plotData[5][1:10:end-(sloInd-i)]./1.5e11,plotData[6][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),2500)/10000)
+            p=plot!(p[2],plotData[1][1:10:end-(sloInd-i)]./1.5e11,plotData[2][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)/10000)
+            p=plot!(p[2],plotData[3][1:10:end-(sloInd-i)]./1.5e11,plotData[4][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)/10000)
+            p=plot!(p[2],plotData[5][1:10:end-(sloInd-i)]./1.5e11,plotData[6][1:10:end-(sloInd-i)]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(i+length(t)-sloInd)) .+ 10000 .- (i+length(t)-sloInd),1000)/10000)
             p=plot!(p[2],star1[1]./1.5e11,star1[2]./1.5e11,color=colors[1],fill=true)
             p=plot!(p[2],star2[1]./1.5e11,star2[2]./1.5e11,color=colors[2],fill=true)
             p=plot!(p[2],star3[1]./1.5e11,star3[2]./1.5e11,color=colors[3],fill=true)
-            p=scatter!(p[2],starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+            p=scatter!(p[2],starsX,starsY,marker=:circle,markerstrokewidth=0.,markercolor=:white,markersize=1,label="") #fake background stars
             #save frame
             png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
             frameNum+=1
@@ -898,10 +908,10 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
             posFuture=pos #don't need future position at end
             limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
-            p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #plot orbits up to i
-            p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #linealpha argument causes lines to decay
-            p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-            p=scatter!(starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+            p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #plot orbits up to i
+            p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #linealpha argument causes lines to decay
+            p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+            p=scatter!(starsX,starsY,marker=:circle,markerstrokewidth=0.,markercolor=:white,markersize=1,label="") #fake background stars
             star1=makeCircleVals(rad[1],[plotData[1][end],plotData[2][end]]) #generate circles with appropriate sizes for each star
             star2=makeCircleVals(rad[2],[plotData[3][end],plotData[4][end]]) #at current positions
             star3=makeCircleVals(rad[3],[plotData[5][end],plotData[6][end]])
@@ -924,13 +934,13 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
                     xlims=(minX,minX+dF+1),ylims=(minY,minY+dF+1),legend=:false,left_margin=0mm,right_margin=0mm,top_margin=0mm,bottom_margin=0mm,
                     foreground_color_border=:white,foreground_color_axis=:white,foreground_color_text=:white,grid=:false,
                     aspect_ratio=:equal,fontfamily=:Courier,subplot=2,framestyle=:box,titlefontsize=10,tickfontsize=6)
-            p=plot!(p[2],plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000)
-            p=plot!(p[2],plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000)
-            p=plot!(p[2],plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000)
+            p=plot!(p[2],plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000)
+            p=plot!(p[2],plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000)
+            p=plot!(p[2],plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000)
             p=plot!(p[2],star1[1]./1.5e11,star1[2]./1.5e11,color=colors[1],fill=true)
             p=plot!(p[2],star2[1]./1.5e11,star2[2]./1.5e11,color=colors[2],fill=true)
             p=plot!(p[2],star3[1]./1.5e11,star3[2]./1.5e11,color=colors[3],fill=true)
-            p=scatter!(p[2],starsX,starsY,markercolor=:white,markersize=:1,label="") #fake background stars
+            p=scatter!(p[2],starsX,starsY,marker=:circle,markerstrokewidth=0.,markercolor=:white,markersize=1,label="") #fake background stars
             #draw zoom box
             cornersX=[minX,minX+dF+1]; cornersY=[minY,minY+dF+1]
             p=plot!([cornersX[1],cornersX[2]],[cornersY[1],cornersY[1]],c=:white,label="") #side 1
@@ -958,11 +968,11 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
             pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
             posFuture=pos #don't need future position at end
             limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
-            p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #plot orbits up to i
-            p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #linealpha argument causes lines to decay
-            p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=2,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),2500)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+            p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #plot orbits up to i
+            p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #linealpha argument causes lines to decay
+            p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
             starDensity = round(Int,speedRecord[end])
-            p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],markercolor=:white,markersize=:1,label="") #fake background stars
+            p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],marker=:circle,markerstrokewdith=0.,markercolor=:white,markersize=1,label="") #fake background stars
             star1=makeCircleVals(rad[1],[plotData[1][end],plotData[2][end]]) #generate circles with appropriate sizes for each star
             star2=makeCircleVals(rad[2],[plotData[3][end],plotData[4][end]]) #at current positions
             star3=makeCircleVals(rad[3],[plotData[5][end],plotData[6][end]])
