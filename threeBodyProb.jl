@@ -380,7 +380,7 @@ function getData(nBodies; totalETol = 1e-5, maxIter = 1000, maxTime=60,minYrs=15
                     open("3BodyStats.txt","a") do f #for stats logging
                         initPos=[coordsRecord[1][1][1],coordsRecord[1][2][1],coordsRecord[1][1][2],coordsRecord[1][2][2],coordsRecord[1][1][3],coordsRecord[1][2][3]]./1.5e11 #AU
                         initV = [coordsRecord[1][3][1],coordsRecord[1][4][1],coordsRecord[1][3][2],coordsRecord[1][4][2],coordsRecord[1][3][3],coordsRecord[1][4][3]]
-                        write(f,"$(today()),$(T[end]/(365*24*3600)),$(mStart[1]/2e30),$(mStart[2]/2e30),$(mStart[3]/2e30),$(radStart[1]/7e8),$(radStart[2]/7e8),$(radStart[3]/7e8),$collisionTmp,$(collisionIndsTmp[1]),$(collisionIndsTmp[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$i\n")
+                        write(f,"$(today()),$(T[i-1]/(365*24*3600)),$(mStart[1]/2e30),$(mStart[2]/2e30),$(mStart[3]/2e30),$(radStart[1]/7e8),$(radStart[2]/7e8),$(radStart[3]/7e8),$collisionTmp,$(collisionIndsTmp[1]),$(collisionIndsTmp[2]),$(initPos[1]),$(initPos[2]),$(initPos[3]),$(initPos[4]),$(initPos[5]),$(initPos[6]),$(initV[1]/1e3),$(initV[2]/1e3),$(initV[3]/1e3),$(initV[4]/1e3),$(initV[5]/1e3),$(initV[6]/1e3),$iter\n")
                     end
                     return coordsRecord[1:i-1], (mStart,m), (radStart,rad), (nBodiesStart,nBodies), T[1:i-1], E[1:i-1], collisionTmp, collisionIndsTmp, escapeTmp, escapeIndTmp, speedRecord[1:i-1]
                 end
