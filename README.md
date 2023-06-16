@@ -113,7 +113,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 * [Julia](https://julialang.org/) – to simulate the system and create the animation frames.
 * [FFmpeg](https://ffmpeg.org/) – to render the animations and integrate audio files.
 * [Node.js](https://nodejs.org/en/) – to post the animations to Twitter from 12/2019 - 6/2023 (with the help of [twit](https://www.npmjs.com/package/twit)).
-* [Python](https://www.python.org/) - to post the animations to Twitter from 6/2023 - present (with the help of [tweepy](https://www.tweepy.org/) as well as posting to Tubmlr (with the help of [pytumblr](https://github.com/tumblr/pytumblr), YouTube (which intermittently works with the help of [opplast](https://github.com/offish/opplast)), and Mastodon (with the help of [Mastodon.py](https://github.com/halcy/Mastodon.py))
+* [Python](https://www.python.org/) - to post the animations to Twitter from 6/2023 - present (with the help of [tweepy](https://www.tweepy.org/)) as well as posting to Tubmlr (with the help of [pytumblr](https://github.com/tumblr/pytumblr), YouTube (which intermittently works with the help of [opplast](https://github.com/offish/opplast)), and Mastodon (with the help of [Mastodon.py](https://github.com/halcy/Mastodon.py))
 * [Bash](https://www.gnu.org/software/bash/) – to pull all scripts together and manage the resulting files.
 
 ## Author
