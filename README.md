@@ -35,9 +35,9 @@ Where the body at index $i$ is the body being moved and $j \neq i$ the bodies th
 For *Twitter*:
 This is my first experience with JavaScript and the Twitter API, so it's mostly cobbled together code from the Twit [documentation](https://www.npmjs.com/package/twit), this auto-tweeting image bot [code](https://github.com/fourtonfish/random-image-twitterbot/blob/master/server-attribution.js), and this video tweeting example from [Loren Stewart](https://lorenstewart.me/2017/02/03/twitter-api-uploading-videos-using-node-js/).
 
-It's a really basic program but it works (mostly anyways).
+**Update:** Twitter finally disabled my free access to the v1.1 API (4 months after they were supposed to), so the bot now uses the Python package [`tweepy`](https://www.tweepy.org/), but I have kept the examples linked above as they were still immensely useful for my learning.
 
-To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)). The script the bot uses to upload to Twitter is at [`server.js`](twitterbot/server.js).
+To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)). The script the bot originally used to upload to Twitter is at [`server.js`](twitterbot/server.js), but unfortunately the Twit package only supports (at this writing) the v1.1 API which Twitter recently locked behind a paywall. The bot now tweets using the Python script [`tweepy_bot.py`](twitterbot/tweepy_bot.py) as [`tweepy`](https://www.tweepy.org) supports the v2 API, but I've kept both versions here on GitHub for those who might be curious.
 
 For *Tumblr*:
 I used the great [pytumblr](https://github.com/tumblr/pytumblr) module (and accompanying documentation there) to upload the simulations to a [tumblr blog](https://www.tumblr.com/threebodybot). You need to register your application to get authentication keys to be able to post but the process is pretty easy with Tubmlr! The script that does the uploading is [`bot.py`](tumblrBot/bot.py).
@@ -112,10 +112,9 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
 * [Julia](https://julialang.org/) – to simulate the system and create the animation frames.
 * [FFmpeg](https://ffmpeg.org/) – to render the animations and integrate audio files.
-* [Node.js](https://nodejs.org/en/) – to post the animations to Twitter (with the help of [twit](https://www.npmjs.com/package/twit)).
+* [Node.js](https://nodejs.org/en/) – to post the animations to Twitter from 12/2019 - 6/2023 (with the help of [twit](https://www.npmjs.com/package/twit)).
+* [Python](https://www.python.org/) - to post the animations to Twitter from 6/2023 - present (with the help of [tweepy](https://www.tweepy.org/) as well as posting to Tubmlr (with the help of [pytumblr](https://github.com/tumblr/pytumblr), YouTube (which intermittently works with the help of [opplast](https://github.com/offish/opplast)), and Mastodon (with the help of [Mastodon.py](https://github.com/halcy/Mastodon.py))
 * [Bash](https://www.gnu.org/software/bash/) – to pull all scripts together and manage the resulting files.
-* [python](https://python.org) - to post the animations to Tumblr, YouTube, and Mastodon (with the help of [pytumblr](https://github.com/tumblr/pytumblr), [opplast](https://github.com/offish/opplast), and [Mastodon.py](https://github.com/halcy/Mastodon.py))
-
 
 ## Author
 
