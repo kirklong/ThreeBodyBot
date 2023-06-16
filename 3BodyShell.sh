@@ -107,7 +107,7 @@ ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio 
 
 echo 'attempting to upload to all platforms\n' >> /home/kirk/Documents/3Body/cron_log.txt
 cd twitterbot
-./server.js >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+./tweep_bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 cd ../tumblrBot
 ./bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 cd ../YouTubeBot
