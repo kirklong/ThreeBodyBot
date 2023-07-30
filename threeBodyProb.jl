@@ -78,7 +78,8 @@ function initCondGen(nBodies; vRange=[-7e3,7e3],posRange=[-35,35],tweet=nothing)
         return m,rad,coords
     else #this only works on my machine using the bot's twitter authentication tokens. files not on GitHub, allows me to replicate simulation from tweet for easier making of extended editions!
         tweetID = split(tweet,"/")[end]
-        run(`getTweetJSON.sh $tweetID`)
+        #run(`getTweetJSON.sh $tweetID`)
+	run(`./getTootJSON.py $tweetID`) #update -- now we use Mastodon since Twitter revoked API access. Anyone should be able to do this for free on Mastodon if they create their own usercred.secret file
         s = readlines("TweetJSON.txt")
         j = JSON.parse(s[1])
         bodySplit = split(j["data"]["text"],"\n")
