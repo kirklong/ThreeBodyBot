@@ -9,4 +9,4 @@ status = m.status(id)
 soup = BeautifulSoup(status.content,features="lxml")
 d = dict(data=dict(id=id,text=soup.get_text('\n')))
 with open("TweetJSON.txt","w") as f:
-    json.dump(d,f)
+    json.dump(d,f,ensure_ascii=False)
