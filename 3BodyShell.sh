@@ -43,7 +43,7 @@ rm *.png
 cd /home/kirk/Documents/3Body
 echo 'adding music' >> /home/kirk/Documents/3Body/cron_log.txt
 echo ' ' >> /home/kirk/Documents/3Body/initCond.txt #so next thing goes to new line
-num=$((1+RANDOM%26)) #get number between 1 and 25
+num=$((1+RANDOM%28)) #get number between 1 and 28
 if [ $num -eq 1 ]; then
   echo 'Music: Adagio for Strings – Barber' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 2 ]; then
@@ -96,6 +96,10 @@ elif [ $num -eq 25 ]; then
   echo 'Music: Memories of Green – Vangelis' >> /home/kirk/Documents/3Body/initCond.txt
 elif [ $num -eq 26 ]; then
   echo 'Music: Dune (2021) Medley – Zimmer' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 27 ]; then
+  echo 'Music: Aurorae Chaos – Bourquenez' >> /home/kirk/Documents/3Body/initCond.txt
+elif [ $num -eq 28 ]; then
+  echo 'Music: Ballad with Modulations – Bourquenez' >> /home/kirk/Documents/3Body/initCond.txt
 fi
 
 musicFile="/home/kirk/Documents/3Body/music/music_choice_${num}.m4a"
@@ -106,12 +110,13 @@ ffmpeg -i $videoFile -i $musicFile -codec copy -shortest $combinedFile #combine 
 ffmpeg -i $combinedFile -codec:a aac -preset slow $combinedAACOut #change audio to aac lc format for twitter
 
 echo 'attempting to upload to all platforms\n' >> /home/kirk/Documents/3Body/cron_log.txt
-cd twitterbot
-./tweep_bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
-cd ../tumblrBot
+#twitter and YouTube commented out because no longer working
+#cd twitterbot
+#./tweep_bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+cd tumblrBot
 ./bot.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
-cd ../YouTubeBot
-./opplastUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
+#cd ../YouTubeBot
+#./opplastUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 cd ../MastodonBot
 ./MastodonUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 
