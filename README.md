@@ -189,4 +189,8 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
   
   25. Dune (2021) Medley – Zimmer (piano cover and recording by me)
 
+  26. [Aurorae Chaos – Bourquenez](https://johannbourquenez.bandcamp.com/track/aurorae-chaos) (recording provided by [composer](http://www.edogm.net/johann/))
+
+  27. [Ballad with Modulations – Bourquenez](https://johannbourquenez.bandcamp.com/track/ballad-with-modulations) (recording provided by [composer](http://www.edogm.net/johann/))
+
 **Disclaimer:** Although I think this project justifiably falls under fair use (purely educational/no money involved/only short snippets used) I have attempted to contact everyone who might have a copyright issue with this anyways in the name of good faith – they have either not replied or granted permission for this limited use. I've also tried to record my own versions of all pieces used (when possible), putting my music minor to good use and hopefully further mitigating any copyright issues. That being said, if you are the copyright owner to any of these tracks (particularly the movie/TV ones) and you do not want them used in the animations I will happily remove them as an option for the bot at your request.
