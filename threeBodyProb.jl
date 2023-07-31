@@ -1017,17 +1017,8 @@ function makeAnim(clean=true; tweet=nothing)
         s = readlines("TweetJSON.txt")
         j = JSON.parse(s[1])
         bodySplit = split(j["data"]["text"],"\n")
-        music = split(bodySplit[end], " ")
-        str = ""
-        for i = 1:length(music)-1
-            str *= i<length(music)-1 ? string(music[i]," ") : music[i]
-        end
-        num = 0
-        for i = 1:length(musicList)
-            if musicList[i] == str
-                num = i
-            end
-        end
+        music = bodySplit[end]
+        num = findfirst(mi -> mi == music,musicList)
         musicFile = "music/music_choice_$num.m4a"
         videoFile = "threeBody.mp4"
         run(`ffmpeg -i $videoFile -i $musicFile -c:a aac -shortest -preset slow -y 3Body_fps30_wMusicAAC.mp4`)
