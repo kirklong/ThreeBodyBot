@@ -185,7 +185,7 @@ You can modify the hard limit in the /etc/security/limits.conf file mentioned ab
 
   23. [Waltz of the Flowers – Tchaikovsky](https://www.youtube.com/watch?v=QxHkLdQy5f0)
 
-  24. Memories of Green (from the Bladerunner soundtrack) – Evangelis (piano cover and recording by me, this one has two different sections recorded the bot randomly picks from)
+  24. Memories of Green (from the Bladerunner soundtrack) – Vangelis (piano cover and recording by me, this one has two different sections recorded the bot randomly picks from)
   
   25. Dune (2021) Medley – Zimmer (piano cover and recording by me)
 
