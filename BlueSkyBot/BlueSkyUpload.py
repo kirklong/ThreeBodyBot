@@ -42,11 +42,11 @@ def main():
     at_client: Client = at_login()
 
     # Read video file from filesystem
-    with open("3Body/3Body_fps30_wMusicAAC.mp4", 'rb') as f:
+    with open("../3Body_fps30_wMusicAAC.mp4", 'rb') as f:
         video_bytes: bytes = f.read()
 
     # Read initial conditions from file
-    with open("3Body/initCond.txt") as f:
+    with open("../initCond.txt") as f:
         initCond: str = f.read()
 
     description = "Initial conditions:\n" + initCond
