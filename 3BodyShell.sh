@@ -119,5 +119,6 @@ cd tumblrBot
 #./opplastUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 cd ../MastodonBot
 ./MastodonUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
-
+cd ../BlueSkyBot
+./BlueSkyUpload.py >> /home/kirk/Documents/3Body/cron_log.txt 2>&1
 echo 'script ran successfully' >> /home/kirk/Documents/3Body/cron_log.txt
