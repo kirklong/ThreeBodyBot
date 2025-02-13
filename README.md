@@ -3,7 +3,7 @@
 <!-- <img align="left" src="figure8.gif" width="380" height="380"> -->
 ![Figure 8 solution](figure8.gif)
 
-A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's [Twitter](https://twitter.com/ThreeBodyBot), [Tumblr](https://www.tumblr.com/threebodybot), [YouTube](https://www.youtube.com/@ThreeBodyBot), or [Mastodon](https://mathstodon.xyz/@threebodybot)!
+A cool stable solution to the three-body problem created by the code, based off of [Chenciner and Montgomery (2000)](https://arxiv.org/pdf/math/0011268.pdf). See all the animations on the bot's ~~[Twitter](https://twitter.com/ThreeBodyBot)~~, [Tumblr](https://www.tumblr.com/threebodybot), [YouTube](https://www.youtube.com/@ThreeBodyBot), or [Mastodon](https://mathstodon.xyz/@threebodybot)!
 
 ### What people are saying about @ThreeBodyBot:
 
@@ -39,14 +39,18 @@ This is my first experience with JavaScript and the Twitter API, so it's mostly 
 
 To tweet from a script you need a developer account with Twitter so that you can fill in API keys (see [`configSample.js`](twitterbot/configSample.js)). The script the bot originally used to upload to Twitter is at [`server.js`](twitterbot/server.js), but unfortunately the Twit package only supports (at this writing) the v1.1 API which Twitter recently locked behind a paywall. The bot now tweets using the Python script [`tweepy_bot.py`](twitterbot/tweepy_bot.py) as [`tweepy`](https://www.tweepy.org) supports the v2 API, but I've kept both versions here on GitHub for those who might be curious.
 
+**Second update:** Sadly, the bot is really dead now...on Twitter anyways (thanks Elon...) but it lives on in other places! Read more below:
+
 For *Tumblr*:
 I used the great [pytumblr](https://github.com/tumblr/pytumblr) module (and accompanying documentation there) to upload the simulations to a [tumblr blog](https://www.tumblr.com/threebodybot). You need to register your application to get authentication keys to be able to post but the process is pretty easy with Tubmlr! The script that does the uploading is [`bot.py`](tumblrBot/bot.py).
 
 For *YouTube*:
 This was the trickiest one... YouTube has a great and easy API to use like Tumblr, but they don't let you publish the videos you upload via their API to the public unless you "verify" your app, which requires a lot of red tape. Part of that verification process is showing how your app works and that it will be used by > 100 people...and on these grounds they denied verifying my app, so I had to get a little crafty. Ended up using this wonderful [Opplast](https://github.com/offish/opplast) repo and instructions therein to accomplish this, but the way this works is significantly less stable over time than if YouTube would just let me use their API to upload, so if you're reading this and you work at YouTube (or know someone who does) and want to help me verify my app please reach out! The script that does the uploading to YouTube is [`opplastUpload.py`](YouTubeBot/opplastUpload.py) and you can find the bot's YouTube channel [here](https://www.youtube.com/channel/UCB6dRXvYWpOqEA3oHUS6xYA).
 
+**Update**: They figured out this work-around and it stopped working and I'm too lazy to find another one...so for now I manually upload only the extended cuts to the bot's YouTube page. 
+
 For *Mastodon*:
-Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://github.com/halcy/Mastodon.py)) that I use to upload the videos to the [bot's Mastodon account](https://botsin.space/web/@ThreeBodyBot). Again you need to register your application to get authentication keys but like Tubmlr it's pretty painless! With Mastodon you also have to make sure the server allows bots, which is why I chose to host the bot on [bots.inspace](https://bots.inspace). The script that takes care of uploading the videos to Mastodon is [`MastodonUpload.py`](MastodonBot/MastodonUpload.py).
+Like Tumblr, Mastodon has a nice Python API wrapper ([Mastodon.py](https://github.com/halcy/Mastodon.py)) that I use to upload the videos to the [bot's Mastodon account](https://mathstodon.xyz/@threebodybot). Again you need to register your application to get authentication keys but like Tubmlr it's pretty painless! With Mastodon you also have to make sure the server allows bots, which is why I originally chose to host the bot on [bots.inspace](https://bots.inspace). This server has since shut down but the bot has found a new home on [Mathstodon](https://mathstodon.xyz/home). The script that takes care of uploading the videos to Mastodon is [`MastodonUpload.py`](MastodonBot/MastodonUpload.py).
 
 ## Want to generate your own animations?
 
