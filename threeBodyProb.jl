@@ -962,38 +962,37 @@ function main(;tweet=nothing,custom=false,maxTime=60,minYrs=15) #pulls everythin
         end
     elseif escape == true
         println("making freeze frame ending")
-        for i = 1:45
-            GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
-            gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
-            print("$(@sprintf("%.2f",i/45*100)) % complete\r") #output percent tracker
-            pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
-            posFuture=pos #don't need future position at end
-            limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
-            p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #plot orbits up to i
-            p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #linealpha argument causes lines to decay
-            p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
-            starDensity = round(Int,speedRecord[end])
-            p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],marker=:circle,markerstrokewdith=0.,markercolor=:white,markersize=1,label="") #fake background stars
-            star1=makeCircleVals(rad[1],[plotData[1][end],plotData[2][end]]) #generate circles with appropriate sizes for each star
-            star2=makeCircleVals(rad[2],[plotData[3][end],plotData[4][end]]) #at current positions
-            star3=makeCircleVals(rad[3],[plotData[5][end],plotData[6][end]])
-            p=plot!(star1[1]./1.5e11,star1[2]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true) #plot star circles with labels
-            p=plot!(star2[1]./1.5e11,star2[2]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
-            p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
-            p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
-                background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,fontfamily=:Courier) #formatting for plot frame
-            p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end]/365/24/3600)) years after start",
-                legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
-                grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
+        GR.inline("png") #added to eneable cron/jobber compatibility, also this makes frames generate WAY faster? Prior to adding this when run from cron/jobber frames would stop generating at 408 for some reason.
+        gr(legendfontcolor = plot_color(:white)) #legendfontcolor=:white plot arg broken right now (at least in this backend)
+        pos=[plotData[1][end],plotData[2][end],plotData[3][end],plotData[4][end],plotData[5][end],plotData[6][end]] #current pos
+        posFuture=pos #don't need future position at end
+        limx,limy,center,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD=computeLimits(pos./1.5e11,posFuture./1.5e11,15,m,orbitOld,ΔCx,ΔCy,ΔL,ΔR,ΔU,ΔD) #convert to AU, 10 AU padding
+        p=plot(plotData[1][1:10:end]./1.5e11,plotData[2][1:10:end]./1.5e11,label="",linecolor=colors[1],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #plot orbits up to i
+        p=plot!(plotData[3][1:10:end]./1.5e11,plotData[4][1:10:end]./1.5e11,label="",linecolor=colors[2],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #linealpha argument causes lines to decay
+        p=plot!(plotData[5][1:10:end]./1.5e11,plotData[6][1:10:end]./1.5e11,label="",linecolor=colors[3],linewidth=1.5,linealpha=max.((1:10:(length(t))) .+ 10000 .- (length(t)),1000)/10000) #example: alpha=max.((1:i) .+ 100 .- i,0) causes only last 100 to be visible
+        starDensity = round(Int,speedRecord[end])
+        p=scatter!(starsX[1:starDensity:end],starsY[1:starDensity:end],marker=:circle,markerstrokewdith=0.,markercolor=:white,markersize=1,label="") #fake background stars
+        star1=makeCircleVals(rad[1],[plotData[1][end],plotData[2][end]]) #generate circles with appropriate sizes for each star
+        star2=makeCircleVals(rad[2],[plotData[3][end],plotData[4][end]]) #at current positions
+        star3=makeCircleVals(rad[3],[plotData[5][end],plotData[6][end]])
+        p=plot!(star1[1]./1.5e11,star1[2]./1.5e11,label="$(@sprintf("%.1f", m[1]./2e30))",color=colors[1],fill=true) #plot star circles with labels
+        p=plot!(star2[1]./1.5e11,star2[2]./1.5e11,label="$(@sprintf("%.1f", m[2]./2e30))",color=colors[2],fill=true)
+        p=plot!(star3[1]./1.5e11,star3[2]./1.5e11,label="$(@sprintf("%.1f", m[3]./2e30))",color=colors[3],fill=true)
+        p=plot!(background_color=:black,background_color_legend=:transparent,foreground_color_legend=:transparent,
+            background_color_outside=:white,aspect_ratio=:equal,legendtitlefontcolor=:white,fontfamily=:Courier) #formatting for plot frame
+        p=plot!(xlabel="x: AU",ylabel="y: AU",title="Random Three-Body Problem\nt: $(@sprintf("%0.2f",t[end]/365/24/3600)) years after start",
+            legend=:topright,xaxis=("x: AU",(limx[1],limx[2]),font(9,"Courier")),yaxis=("y: AU",(limy[1],limy[2]),font(9,"Courier")),
+            grid=false,titlefont=font(14,"Courier"),size=(720,721),legendfontsize=8,legendtitle="Mass (in solar masses)",legendtitlefontsize=8) #add in axes/title/legend with formatting
 
-            sX,sY = relative(p[1],1/6,19/20)
-            n = escapeInd; x = coordsRecord[end][1]; y = coordsRecord[end][2]; vx = coordsRecord[end][3]; vy = coordsRecord[end][4]
-            CMX = sum(m[1:end .!= n].*x[1:end .!= n])/sum(m[1:end .!= n])
-            CMY = sum(m[1:end .!= n].*y[1:end .!= n])/sum(m[1:end .!= n])
-            CMDist = sqrt((x[n]-CMX)^2+(y[n]-CMY)^2)
-            V = sqrt(vx[n]^2+vy[n]^2)
-            vEsc = sqrt(2*6.67e-11*sum(m[1:end .!= n])/CMDist)
-            p = annotate!(sX,sY,Plots.text(("Body $escapeInd escaped\nwith v = $(@sprintf("%.2f",V/vEsc))x\nescape velocity"),"Courier",10,colors[n],"left"))
+        sX,sY = relative(p[1],1/6,19/20)
+        n = escapeInd; x = coordsRecord[end][1]; y = coordsRecord[end][2]; vx = coordsRecord[end][3]; vy = coordsRecord[end][4]
+        CMX = sum(m[1:end .!= n].*x[1:end .!= n])/sum(m[1:end .!= n])
+        CMY = sum(m[1:end .!= n].*y[1:end .!= n])/sum(m[1:end .!= n])
+        CMDist = sqrt((x[n]-CMX)^2+(y[n]-CMY)^2)
+        V = sqrt(vx[n]^2+vy[n]^2)
+        vEsc = sqrt(2*6.67e-11*sum(m[1:end .!= n])/CMDist)
+        p = annotate!(sX,sY,Plots.text(("Body $escapeInd escaped\nwith v = $(@sprintf("%.2f",V/vEsc))x\nescape velocity"),"Courier",10,colors[n],"left"))
+        for i = 1:45
             png(p,@sprintf("tmpPlots/frame_%06d.png",frameNum))
             frameNum+=1
             closeall() #close plots
